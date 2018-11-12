@@ -1,0 +1,22 @@
+<package format="2">
+  <name>controls</name>
+  <version>0.0.1</version>
+  <description>
+    Publishers and subscribers that use the parameter server, dynamic
+    reconfigure, timers, and custom messages. Examples for Python and C++ are
+    included.
+  </description>
+  <author>blah</author>
+  <maintainer email="blah@blah.com">blah</maintainer>
+  <license>BSD</license>
+  <url>blah</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>roscpp</depend>
+
+</package>
