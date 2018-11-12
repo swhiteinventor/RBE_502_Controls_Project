@@ -1,5 +1,6 @@
 Put tasks in here:
- - get VICON Bridge working
+ - create launch file
+ - implement PID controller
  - Attach markers to robot 
  - Test on robot
  - 
