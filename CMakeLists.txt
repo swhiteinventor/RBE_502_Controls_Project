@@ -25,6 +25,6 @@ install(DIRECTORY launch
 )
 
 install(PROGRAMS
-  nodes/controls/PID_controller.py
+  nodes/controls/PID_Controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
