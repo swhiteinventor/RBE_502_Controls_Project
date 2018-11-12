@@ -9,7 +9,7 @@ import Queue
 
 from std_msgs.msg import Empty, String
 import tf.transformations
-from geometry_msgs.msg import Twist TransformStamped
+from geometry_msgs.msg import Twist, TransformStamped
 
 class PID_Controller():
 
@@ -20,14 +20,14 @@ class PID_Controller():
 
         self.pub = rospy.Publisher('topic/name/here', Twist, latch=True, queue_size=1)
         t = Twist()
-        t.Vector3.linear.x = 
-        t.Vector3.linear.y = 
-        t.Vector3.linear.z = 0
+        t.linear.x = 0.0 # TODO
+        t.linear.y = 0.0 # TODO
+        t.linear.z = 0
  
-        t.Vector3.angular.x = 
-        t.Vector3.angular.y = 
-        t.Vector3.angular.z = 0
-        self.pub.publish(s)
+        t.angular.x = 0.0 # TODO
+        t.angular.y = 0.0 # TODO
+        t.angular.z = 0
+        self.pub.publish(t)
         rospy.spin()
 
 
