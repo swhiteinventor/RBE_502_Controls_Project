@@ -16,12 +16,17 @@ class PID_Controller():
     def __init__(self):
         rospy.loginfo("Server node started.")
 
-        rospy.Subscriber('/vicon/wand/wand/name/here', geometry_msgs/TransformStamped
-, self.on_data)
+        rospy.Subscriber('/vicon/wand/wand', TransformStamped, self.on_data) #change wand to turtlebot later
 
-        self.pub = rospy.Publisher('topic/name/here', String, latch=True, queue_size=1)
-        s = String()
-        s.String = ""
+        self.pub = rospy.Publisher('topic/name/here', Twist, latch=True, queue_size=1)
+        t = Twist()
+        t.Vector3.linear.x = 
+        t.Vector3.linear.y = 
+        t.Vector3.linear.z = 0
+ 
+        t.Vector3.angular.x = 
+        t.Vector3.angular.y = 
+        t.Vector3.angular.z = 0
         self.pub.publish(s)
         rospy.spin()
 
