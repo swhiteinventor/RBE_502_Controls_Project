@@ -23,3 +23,8 @@ include_directories(
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+install(PROGRAMS
+  nodes/controls/PID_controller.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
