@@ -8,14 +8,16 @@ import rospy
 import Queue
 
 from std_msgs.msg import Empty, String
-
+import tf.transformations
+from geometry_msgs.msg import Twist TransformStamped
 
 class PID_Controller():
 
     def __init__(self):
         rospy.loginfo("Server node started.")
 
-        rospy.Subscriber('topic/name/here', Empty, self.on_data)
+        rospy.Subscriber('/vicon/wand/wand/name/here', geometry_msgs/TransformStamped
+, self.on_data)
 
         self.pub = rospy.Publisher('topic/name/here', String, latch=True, queue_size=1)
         s = String()

@@ -7,7 +7,7 @@ from catkin_pkg.python_setup import generate_distutils_setup
 
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
-    packages=['robotender_server'],
+    packages=['controls'],
     package_dir={'': 'nodes'},
     requires=['std_msgs', 'rospy']
 )
