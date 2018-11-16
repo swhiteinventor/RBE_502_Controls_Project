@@ -33,15 +33,22 @@ class PID_Controller():
 
 
 	def trajectory_tracking(self, desired_v, desired_theta):
-		state_dot = current_state - past_state
-		#calculates derivatives
-		x_dot = state_dot.x/state_dot.t
-		y_dot = state_dot.y/state_dot.t
-		yaw_dot = state_dot.yaw/state_dot.t
+
 
 		current_v = (x_dot)^2+(y_dot)^2)^0.5
 		error_v = calculate_error(
 		return v, theta
+
+	def calculate_derivatives(self)
+		state_dot = current_state - past_state
+		#calculates derivatives
+		x_dot = state_dot.x/state_dot.t
+		y_dot = state_dot.y/state_dot.t
+		z_dot = state_dot.z/state_dot.t
+		roll_dot = state_dot.roll/state_dot.t
+		pitch_dot = state_dot.pitch/state_dot.t
+		yaw_dot = state_dot.yaw/state_dot.t
+		RobotState(x_dot, y_dot, z_dot, roll_dot, pitch_dot, yaw_dot, state_dot.t)
 
 	def calculate_error(self, current, goal):
 		error = current - goal
