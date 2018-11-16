@@ -34,21 +34,16 @@ class PID_Controller():
 
 	def trajectory_tracking(self, desired_v, desired_theta):
 
-
-		current_v = (x_dot)^2+(y_dot)^2)^0.5
-		error_v = calculate_error(
-		return v, theta
+		state_dot = self.calculate_derivatives()
+		current_v = ((state_dot.x)^2+(state_dot.y)^2)^0.5 #do we need z in here?
+		error_v = self.calculate_error()
+		return (v, theta)
 
 	def calculate_derivatives(self)
-		state_dot = current_state - past_state
-		#calculates derivatives
-		x_dot = state_dot.x/state_dot.t
-		y_dot = state_dot.y/state_dot.t
-		z_dot = state_dot.z/state_dot.t
-		roll_dot = state_dot.roll/state_dot.t
-		pitch_dot = state_dot.pitch/state_dot.t
-		yaw_dot = state_dot.yaw/state_dot.t
-		RobotState(x_dot, y_dot, z_dot, roll_dot, pitch_dot, yaw_dot, state_dot.t)
+		delta_state = self.current_state - self.past_state
+		#calculates derivatives, where time (t) is the time step
+		state_dot = delta_state.divideByTime()
+		return state_dot
 
 	def calculate_error(self, current, goal):
 		error = current - goal
@@ -68,21 +63,29 @@ class PID_Controller():
 
 
 	def on_data(self, data):
+		
 		"""Callback function that handle subscriber data and updates self."""
 		rospy.loginfo(rospy.get_name() + " I got data %s", data)
+		
 		#sets the position data	
-		self.x = data.linear.x #hi
-		self.y = data.linear.y
-		self.z = data.linear.z
+		x = data.linear.x #hi
+		y = data.linear.y
+		z = data.linear.z
+		
 		#converts the quaternion to euler angles
 		euler = quaternion_to_euler(data.angular)
+		
 		#sets the orientation data	
-		self.roll = euler[0]
-		self.pitch = euler[1]
-		self.yaw = euler[2]
+		roll = euler[0]
+		pitch = euler[1]
+		yaw = euler[2]
+		
 		#grabs the current time stamp
-		self.previous_time = self.current_time		
-		self.current_time = data.header.stamp.sec + data.header.stamp.nsec/1E9
+		current_time = data.header.stamp.sec + data.header.stamp.nsec/1E9
+
+		#set states
+		self.past_state = self.current_state
+		self.current_state = RobotState(x,y,z,roll,pitch,yaw,current_time)
 
 	def quaternion_to_euler(quaternion):
 		"""converts a quaternion to euler angles"""
