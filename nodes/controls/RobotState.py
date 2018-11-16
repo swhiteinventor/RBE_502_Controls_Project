@@ -8,9 +8,11 @@ class RobotState():
 		self.yaw = yaw
 		self.t = t
 	
-	def set PositionAndRPY(self, x=None, y=None, z=None, roll=None, pitch=None, yaw=None):
+	def setPositionRPYt(self, x=None, y=None, z=None, roll=None, pitch=None, yaw=None, t=None):
 		self.setPosition(x,y,z)
 		self.setRPY(roll,pitch,yaw)
+		if t!=None:
+			self.t = t
 
 	def setPosition(self, x=None, y=None, z=None):
 		if x!=None:
@@ -19,6 +21,7 @@ class RobotState():
 			self.y = y
 		if z!=None:
 			self.z = z
+
 	def setRPY(self, roll=None, pitch=None, yaw=None):
 		if roll!=None:
 			self.roll = roll
@@ -26,3 +29,31 @@ class RobotState():
 			self.pitch = pitch
 		if yaw!=None:
 			self.yaw = yaw
+			
+	def divideByTime(self):
+		a = self
+		r = RobotState()
+
+		r.x = a.x/a.t
+		r.y = a.y/a.t
+		r.z = a.z/a.t
+		r.roll = a.roll/a.t
+		r.pitch = a.pitch/a.t
+		r.yaw = a.yaw/a.t
+		r.t = a.t
+
+		return r
+
+	def __sub__(self, b):
+		a = self
+		r = RobotState()
+
+		r.x = a.x - b.x
+		r.y = a.y - b.y
+		r.z = a.z - b.z
+		r.roll = a.roll - b.roll
+		r.pitch = a.pitch - b.pitch
+		r.yaw = a.yaw - b.yaw
+		r.t = a.t - b.t
+
+		return r
