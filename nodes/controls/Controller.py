@@ -39,7 +39,10 @@ class Controller():
 
 		state_dot = self.calculate_derivatives()
 		current_v = ((state_dot.x)^2+(state_dot.y)^2)^0.5 #do we need z in here?
-		error_v = self.calculate_error()
+		error_v = self.calculate_error(current_v, desired_v)
+		current_theta = self.current_state.yaw
+		error_theta = self.calculate_error(current_theta, desired_theta)
+		v, theta = PID_controller(error_v, error_theta)
 		return (v, theta)
 
 	def calculate_derivatives(self):
