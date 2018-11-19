@@ -3,5 +3,5 @@
 <launch>
 
   <!-- The listener node subscribes to the custom message that talker is publishing. -->
-  <node pkg="controls" type="PID_Controller.py" name="PID_Controller"/>
+  <node pkg="controls" type="Controller.py" name="Controller"/>
 </launch>
