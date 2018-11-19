@@ -93,8 +93,8 @@ class Controller():
 		self.past_state = self.current_state
 		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
-		if self.controller == "PID":
-			PID_Control(self)
+		v, theta = self.trajectory_tracking(2, 0)
+		self.send_twist_message(v,theta)
 
 	def quaternion_to_euler(quaternion):
 		"""converts a quaternion to euler angles"""
@@ -110,8 +110,6 @@ if __name__ == '__main__':
     
 	try:
 		controller_server = Controller()
-
-		controller_server.trajectory_tracking(2, 0)
 
 	except rospy.ROSInterruptException:
 		rospy.logerror("Failed to start server node.")
