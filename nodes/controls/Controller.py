@@ -65,6 +65,7 @@ class Controller():
 		t.angular.y = 0
 		t.angular.z = theta
 		self.pub.publish(t)
+		# keeps python from exiting until this node is stopped
 		rospy.spin()
 
 
