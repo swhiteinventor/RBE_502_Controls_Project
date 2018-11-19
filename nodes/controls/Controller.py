@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('controls')
 import rospy
 import Queue
 
-from RobotState import RobotState
+from RobotState import Robot_State
 from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
@@ -17,8 +17,8 @@ class Controller():
 		rospy.loginfo("Server node started.")
 	
 		#initializes the robot's position and orientation and time
-		self.past_state = RobotState()
-		self.current_state = RobotState()
+		self.past_state = Robot_State()
+		self.current_state = Robot_State()
 
 		#initializes gains
 		self.kp_v = 10
@@ -45,7 +45,7 @@ class Controller():
 	def calculate_derivatives(self):
 		delta_state = self.current_state - self.past_state
 		#calculates derivatives, where time (t) is the time step
-		state_dot = delta_state.divideByTime()
+		state_dot = delta_state.divide_by_time()
 		return state_dot
 
 	def calculate_error(self, current, goal):
@@ -88,7 +88,7 @@ class Controller():
 
 		#set states
 		self.past_state = self.current_state
-		self.current_state = RobotState(x,y,z,roll,pitch,yaw,current_time)
+		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
 		if self.controller == "PID":
 			PID_Control(self)
