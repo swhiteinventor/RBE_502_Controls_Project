@@ -34,6 +34,7 @@ class Controller():
 		rospy.Subscriber('/vicon/wand/wand', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('topic/name/here', Twist, latch=True, queue_size=1)
 
+		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
 
@@ -65,8 +66,6 @@ class Controller():
 		t.angular.y = 0
 		t.angular.z = theta
 		self.pub.publish(t)
-		# keeps python from exiting until this node is stopped
-		rospy.spin()
 
 
 	def on_data(self, data):
