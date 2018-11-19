@@ -4,11 +4,11 @@ import roslib; roslib.load_manifest('controls')
 import rospy
 import Queue
 
-from RobotState import Robot_State
+from Robot_State import Robot_State
 from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
-from PID_Controller import PID_Control
+from PID_Controller import PID_Controller
 
 class Controller():
 
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	rospy.init_node('PID_Controller')
     
 	try:
-		rs = PID_Controller()
+		rs = Controller()
 
 	except rospy.ROSInterruptException:
 		rospy.logerror("Failed to start server node.")

@@ -1,5 +1,5 @@
 # PID_Controller
-def PID_Control(controller, error_v, error_theta):
+def PID_Controller(controller, error_v, error_theta):
 	print controller.controller
 
 	v = controller.kp_v*error_v + controller.ki_v*error_v + controller.kv_v*error_v
