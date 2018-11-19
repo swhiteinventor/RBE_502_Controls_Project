@@ -110,7 +110,9 @@ if __name__ == '__main__':
 	rospy.init_node('PID_Controller')
     
 	try:
-		rs = Controller()
+		controller_server = Controller()
+
+		controller_server.trajectory_tracking(2, 0)
 
 	except rospy.ROSInterruptException:
 		rospy.logerror("Failed to start server node.")
