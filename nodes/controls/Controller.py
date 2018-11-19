@@ -74,12 +74,12 @@ class Controller():
 		rospy.loginfo(rospy.get_name() + " I got data %s", data)
 		
 		#sets the position data	
-		x = data.linear.x #hi
-		y = data.linear.y
-		z = data.linear.z
+		x = data.transform.translation.x #hi
+		y = data.transform.translation.y
+		z = data.transform.translation.z
 		
 		#converts the quaternion to euler angles
-		euler = quaternion_to_euler(data.angular)
+		euler = self.quaternion_to_euler(data.transform.rotation)
 		
 		#sets the orientation data	
 		roll = euler[0]
@@ -96,7 +96,7 @@ class Controller():
 		v, theta = self.trajectory_tracking(2, 0)
 		self.send_twist_message(v,theta)
 
-	def quaternion_to_euler(quaternion):
+	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
 		#type(pose) = geometry_msgs.msg.Pose
 		euler = tf.transformations.euler_from_quaternion(quaternion)
