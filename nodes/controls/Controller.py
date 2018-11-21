@@ -8,7 +8,7 @@ from Robot_State import Robot_State
 from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
-from PID_Controller import PID_Controller
+from PID_Controller import PID_controller
 
 class Controller():
 
@@ -17,8 +17,8 @@ class Controller():
 		rospy.loginfo("Server node started.")
 	
 		#initializes the robot's position and orientation and time
-		self.past_state = Robot_State()
-		self.current_state = Robot_State()
+		self.past_state = None
+		self.current_state = None
 
 		#initializes gains
 		self.kp_v = 10
@@ -37,27 +37,31 @@ class Controller():
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
+		rospy.loginfo("traj tracking")
 
 		state_dot = self.calculate_derivatives()
-		current_v = ((state_dot.x)^2+(state_dot.y)^2)^0.5 #do we need z in here?
+		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 #do we need z in here?
 		error_v = self.calculate_error(current_v, desired_v)
 		current_theta = self.current_state.yaw
 		error_theta = self.calculate_error(current_theta, desired_theta)
-		v, theta = PID_controller(error_v, error_theta)
+		v, theta = PID_controller(self, error_v, error_theta)
 		return (v, theta)
 
 	def calculate_derivatives(self):
+		rospy.loginfo("calc derivs")
 		delta_state = self.current_state - self.past_state
 		#calculates derivatives, where time (t) is the time step
 		state_dot = delta_state.divide_by_time()
 		return state_dot
 
 	def calculate_error(self, current, goal):
+		rospy.loginfo("calc error")
 		error = current - goal
 		return error
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
+		rospy.loginfo("send twist msg")
 		t = Twist()
 		t.linear.x = v
 		t.linear.y = 0
@@ -69,6 +73,7 @@ class Controller():
 
 
 	def on_data(self, data):
+		rospy.loginfo("on data")
 		
 		"""Callback function that handle subscriber data and updates self."""
 		rospy.loginfo(rospy.get_name() + " I got data %s", data)
@@ -87,19 +92,21 @@ class Controller():
 		yaw = euler[2]
 		
 		#grabs the current time stamp
-		current_time = data.header.stamp.sec + data.header.stamp.nsec/1E9
+		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
 
 		#set states
 		self.past_state = self.current_state
 		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
-		v, theta = self.trajectory_tracking(2, 0)
-		self.send_twist_message(v,theta)
+		if self.past_state != None:
+			v, theta = self.trajectory_tracking(2, 0)
+			self.send_twist_message(v,theta)
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
+		rospy.loginfo("quat to euler")
 		#type(pose) = geometry_msgs.msg.Pose
-		euler = tf.transformations.euler_from_quaternion(quaternion)
+		euler = tf.transformations.euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 		return euler
 
 # Main function.

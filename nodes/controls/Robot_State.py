@@ -34,6 +34,9 @@ class Robot_State():
 		a = self
 		r = Robot_State()
 
+		if a.t == 0.0:
+			a.t = 1E-99
+			
 		r.x = a.x/a.t
 		r.y = a.y/a.t
 		r.z = a.z/a.t
