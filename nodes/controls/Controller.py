@@ -37,7 +37,7 @@ class Controller():
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
-		rospy.loginfo("traj tracking")
+		#rospy.loginfo("traj tracking")
 
 		state_dot = self.calculate_derivatives()
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 #do we need z in here?
@@ -48,20 +48,20 @@ class Controller():
 		return (v, theta)
 
 	def calculate_derivatives(self):
-		rospy.loginfo("calc derivs")
+		#rospy.loginfo("calc derivs")
 		delta_state = self.current_state - self.past_state
 		#calculates derivatives, where time (t) is the time step
 		state_dot = delta_state.divide_by_time()
 		return state_dot
 
 	def calculate_error(self, current, goal):
-		rospy.loginfo("calc error")
+		#rospy.loginfo("calc error")
 		error = current - goal
 		return error
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
-		rospy.loginfo("send twist msg")
+		#rospy.loginfo("send twist msg")
 		t = Twist()
 		t.linear.x = v
 		t.linear.y = 0
@@ -73,7 +73,7 @@ class Controller():
 
 
 	def on_data(self, data):
-		rospy.loginfo("on data")
+		#rospy.loginfo("on data")
 		
 		"""Callback function that handle subscriber data and updates self."""
 		rospy.loginfo(rospy.get_name() + " I got data %s", data)
@@ -104,7 +104,7 @@ class Controller():
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
-		rospy.loginfo("quat to euler")
+		#rospy.loginfo("quat to euler")
 		#type(pose) = geometry_msgs.msg.Pose
 		euler = tf.transformations.euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 		return euler
