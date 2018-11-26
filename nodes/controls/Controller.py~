@@ -32,7 +32,7 @@ class Controller():
 	
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/wand/wand', TransformStamped, self.on_data) 
-		self.pub = rospy.Publisher('topic/name/here', Twist, latch=True, queue_size=1)
+		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
 		rospy.spin()
 
@@ -61,8 +61,10 @@ class Controller():
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
-		v = min(v,1)
-		v = max(v,-1)
+		v = min(v,.5)
+		v = max(v,-.5)
+		theta = min(theta,.5)
+		theta = max(theta,-.5)
 		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
 		t = Twist()
 		t.linear.x = v

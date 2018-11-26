@@ -31,8 +31,8 @@ class Controller():
 		self.controller = "PID"
 	
 		#change wand to turtlebot later
-		rospy.Subscriber('/vicon/wand/wand', TransformStamped, self.on_data) 
-		self.pub = rospy.Publisher('topic/name/here', Twist, latch=True, queue_size=1)
+		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
+		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
 		rospy.spin()
 
@@ -61,8 +61,10 @@ class Controller():
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
-		v = min(v,1)
-		v = max(v,-1)
+		v = min(v,3)
+		v = max(v,-3)
+		theta = min(theta,3)
+		theta = max(theta,-3)
 		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
 		t = Twist()
 		t.linear.x = v
@@ -101,7 +103,7 @@ class Controller():
 		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
 		if self.past_state != None:
-			v, theta = self.trajectory_tracking(2, 0)
+			v, theta = self.trajectory_tracking(0.5, 0)
 			self.send_twist_message(v,theta)
 
 	def quaternion_to_euler(self, quaternion):
