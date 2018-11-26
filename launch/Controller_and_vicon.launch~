@@ -9,5 +9,5 @@
 	</node>
 
 	<!-- The listener node subscribes to the custom message that talker is publishing. -->
-	<node pkg="controls" type="Controller.py" name="Controller" output="screen" />
+	<node pkg="controls" type="Controller.py" name="Controller"/>
 </launch>
