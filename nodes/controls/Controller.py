@@ -22,17 +22,18 @@ class Controller():
 		self.current_state = None
 
 		#initializes gains
-		self.kp_v = 10
-		self.ki_v = 0.2
-		self.kd_v = 5
-		self.kp_theta = 10
-		self.ki_theta = 0.2
-		self.kd_theta = 5
+		self.kp_v = 1
+		self.ki_v = 0
+		self.kd_v = .01
+		self.kp_theta = 1
+		self.ki_theta = 0
+		self.kd_theta = .01
 
 		self.controller = "PID"
+		self.moving_avg_count = 5
 		self.array_iterator = 0
-		self.v_array = [0]*5
-		self.theta_array = [0]*5
+		self.v_array = [0]*self.moving_avg_count
+		self.theta_array = [0]*self.moving_avg_count
 	
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
@@ -65,24 +66,20 @@ class Controller():
 
 	def moving_average(self, new_v, new_theta):
 		#takes in a new velocity and new theta command and returns the average velocity and theta command
-		self.v_array[iterator] = new_v
-		self.theta_array[iterator] = new_theta
+		self.v_array[self.array_iterator] = new_v
+		self.theta_array[self.array_iterator] = new_theta
 		v_average = np.mean(self.v_array)
-		theta_average = np.mean(self.theta_average)
-		self.iterator += 1
-		if self.iterator == 5:
-			self.iterator = 0
+		theta_average = np.mean(self.theta_array)
+		self.array_iterator += 1
+		if self.array_iterator == self.moving_avg_count:
+			self.array_iterator = 0
 		return [v_average, theta_average]
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
-		v = min(v,3)
-		v = max(v,-3)
-		theta = min(theta,3)
-		theta = max(theta,-3)
 		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
 		t = Twist()
-		t.linear.x = v
+		t.linear.x = -v
 		t.linear.y = 0
 		t.linear.z = 0
 	 	t.angular.x = 0
