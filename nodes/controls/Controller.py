@@ -3,6 +3,7 @@
 import roslib; roslib.load_manifest('controls')
 import rospy
 import Queue
+import numpy as np
 
 from Robot_State import Robot_State
 from std_msgs.msg import Empty, String
@@ -29,6 +30,9 @@ class Controller():
 		self.kd_theta = 5
 
 		self.controller = "PID"
+		self.array_iterator = 0
+		self.v_array = [0]*5
+		self.theta_array = [0]*5
 	
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
@@ -58,6 +62,17 @@ class Controller():
 		#rospy.loginfo("calc error")
 		error = current - goal
 		return error
+
+	def moving_average(self, new_v, new_theta):
+		#takes in a new velocity and new theta command and returns the average velocity and theta command
+		self.v_array[iterator] = new_v
+		self.theta_array[iterator] = new_theta
+		v_average = np.mean(self.v_array)
+		theta_average = np.mean(self.theta_average)
+		self.iterator += 1
+		if self.iterator == 5:
+			self.iterator = 0
+		return [v_average, theta_average]
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
@@ -104,7 +119,8 @@ class Controller():
 
 		if self.past_state != None:
 			v, theta = self.trajectory_tracking(0.5, 0)
-			self.send_twist_message(v,theta)
+			[v_average, theta_average] = self.moving_average(v,theta)
+			self.send_twist_message(v_average,theta_average)
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
