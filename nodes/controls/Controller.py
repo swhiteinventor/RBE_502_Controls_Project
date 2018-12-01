@@ -32,8 +32,11 @@ class Controller():
 
 		#initializes Dynamic Feedback Linearization gains
 
-
-		self.controller = "PID"
+		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
+		#self.controller = "PID"
+		self.controller = "DFL"
+		#self.controller = "NLF"
+		
 		self.moving_avg_count = 5
 		self.array_iterator = 0
 		self.v_array = [0]*self.moving_avg_count
@@ -53,11 +56,28 @@ class Controller():
 		#rospy.loginfo("traj tracking")
 
 		state_dot = self.calculate_derivatives()
-		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 #do we need z in here?
+		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*self.state_dot.t
+		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*self.state_dot.t
+		desired_x_dot = desired_v
+		desired_y_dot = 0
+		desired_x_dot_dot = 0
+		desired_y_dot_dot = 0
+		error_x = self.calculate_error(self.current_state.x,desired_x)
+		error_y = self.calculate_error(self.current_state.y,desired_y)
+		error_x_dot = self.calculate_error(self.state_dot.x, desired_x_dot)
+		error_y_dot = self.calculate_error(self.state_dot.y, desired_y_dot)
+		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		error_v = self.calculate_error(current_v, desired_v)
 		current_theta = self.current_state.yaw
 		error_theta = self.calculate_error(current_theta, desired_theta)
-		v, theta = PID_controller(self, error_v, error_theta)
+		
+		#runs chosen controller:
+		if self.controller == "DFL": #dynamic feedback linearization
+			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta)
+		else if self.controller == "NLF": #non-linear feedback
+			v, theta = NLF_controller(self, error_v, error_theta)
+		else: #defaults to PID controller
+			v, theta = PID_controller(self, error_v, error_theta)
 		return (v, theta)
 
 	def calculate_derivatives(self):
@@ -122,6 +142,7 @@ class Controller():
 		self.past_state = self.current_state
 		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
+		#calls the trajectory tracker
 		if self.past_state != None:
 			v, theta = self.trajectory_tracking(0.5, 0)
 			[v_average, theta_average] = self.moving_average(v,theta)
