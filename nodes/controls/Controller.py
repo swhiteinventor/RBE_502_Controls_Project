@@ -31,6 +31,11 @@ class Controller():
 		self.kd_theta = .01
 
 		#initializes Dynamic Feedback Linearization gains
+		self.kp_1 = 1
+		self.kp_2 = 1
+		self.kd_1 = 0.2
+		self.kd_2 = 0.2
+		
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		#self.controller = "PID"
