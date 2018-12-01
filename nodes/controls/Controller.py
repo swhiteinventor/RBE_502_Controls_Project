@@ -9,6 +9,7 @@ from Robot_State import Robot_State
 from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
+from tf2_msgs.msg import TFMessage
 from PID_Controller import PID_controller
 
 class Controller():
@@ -21,13 +22,16 @@ class Controller():
 		self.past_state = None
 		self.current_state = None
 
-		#initializes gains
+		#initializes PID gains
 		self.kp_v = 1
 		self.ki_v = 0
 		self.kd_v = .01
 		self.kp_theta = 1
 		self.ki_theta = 0
 		self.kd_theta = .01
+
+		#initializes Dynamic Feedback Linearization gains
+
 
 		self.controller = "PID"
 		self.moving_avg_count = 5
@@ -38,6 +42,10 @@ class Controller():
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
+
+		if SIMULATION == True:
+			rospy.Subscriber('/tf', TFMessage, self.on_tf) 
+			self.pub_tf = rospy.Publisher('/vicon/turtlebot/turtlebot', TransformStamped, latch=True, queue_size=1)
 
 		rospy.spin()
 
@@ -85,7 +93,7 @@ class Controller():
 	 	t.angular.x = 0
 		t.angular.y = 0
 		t.angular.z = theta
-		self.pub.publish(t)
+		self.pub_tf.publish(t)
 
 
 	def on_data(self, data):
@@ -125,6 +133,17 @@ class Controller():
 		#type(pose) = geometry_msgs.msg.Pose
 		euler = tf.transformations.euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 		return euler
+
+	def on_tf(self, data):
+		transform = None
+		for d in data:
+			if d.header.frame_id == "odom":
+				transform = d.transform
+		if transform != None:
+			print transform
+			t = TransformStamped()
+			t.transform = transform
+			self.pub.publish(t)
 
 # Main function.
 if __name__ == '__main__':
