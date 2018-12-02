@@ -1,5 +1,5 @@
 Put tasks in here:
- - Attach markers to robot 
- - Test on robot
- - Choose bumps
- - Decide on what aspects of transient performance we are comparing (find paper precident)
+ - Finish other two controllers
+ - Tune all controller gains
+ - Test broad range of bumps, pick 2-4 to study
+ - Test chosen bumps
