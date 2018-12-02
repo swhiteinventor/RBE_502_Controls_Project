@@ -49,7 +49,8 @@ class Controller():
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
-		
+		SIMULATION = rospy.get_param("simulation")
+
 		self.moving_avg_count = 5
 		self.array_iterator = 0
 		self.v_array = [0]*self.moving_avg_count
@@ -59,8 +60,8 @@ class Controller():
 		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
-		SIMULATION = True
-		if SIMULATION == True:
+		#SIMULATION = True
+		if SIMULATION == "True":
 			rospy.Subscriber('/gazebo/model_states', ModelStates, self.on_tf) 
 			self.pub_tf = rospy.Publisher('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, latch=True, queue_size=1)
 
