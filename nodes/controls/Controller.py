@@ -55,16 +55,18 @@ class Controller():
 		self.array_iterator = 0
 		self.v_array = [0]*self.moving_avg_count
 		self.theta_array = [0]*self.moving_avg_count
-	
+		
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
-		#SIMULATION = True
-		if SIMULATION == "True":
+		if SIMULATION == True:
+			rospy.loginfo("SIMULATION == True")
 			rospy.Subscriber('/gazebo/model_states', ModelStates, self.on_tf) 
 			self.pub_tf = rospy.Publisher('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, latch=True, queue_size=1)
 
+
+		rospy.loginfo("rospy.spin()")
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
