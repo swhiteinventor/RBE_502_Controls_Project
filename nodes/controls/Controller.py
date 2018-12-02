@@ -6,10 +6,10 @@ import Queue
 import numpy as np
 
 from Robot_State import Robot_State
-from std_msgs.msg import Empty, String
+from std_msgs.msg import Empty, String, Header
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
-from tf2_msgs.msg import TFMessage
+from gazebo_msgs.msg import ModelStates
 from PID_Controller import PID_controller
 
 class Controller():
@@ -23,12 +23,12 @@ class Controller():
 		self.current_state = None
 
 		#initializes PID gains
-		self.kp_v = 1
+		self.kp_v = .00001
 		self.ki_v = 0
-		self.kd_v = .01
-		self.kp_theta = 1
+		self.kd_v = .00001
+		self.kp_theta = .00001
 		self.ki_theta = 0
-		self.kd_theta = .01
+		self.kd_theta = .00001
 
 		#initializes Dynamic Feedback Linearization gains
 
@@ -43,8 +43,10 @@ class Controller():
 		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
+		SIMULATION = True
+
 		if SIMULATION == True:
-			rospy.Subscriber('/tf', TFMessage, self.on_tf) 
+			rospy.Subscriber('/gazebo/model_states', ModelStates, self.on_tf) 
 			self.pub_tf = rospy.Publisher('/vicon/turtlebot/turtlebot', TransformStamped, latch=True, queue_size=1)
 
 		rospy.spin()
@@ -85,15 +87,17 @@ class Controller():
 
 	def send_twist_message(self, v, theta):
 		"""takes in the velocity and theta"""
-		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
 		t = Twist()
+		v = max(-2, min(2, v))
+		theta = max(-2, min(2, theta))
+		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
 		t.linear.x = -v
 		t.linear.y = 0
 		t.linear.z = 0
 	 	t.angular.x = 0
 		t.angular.y = 0
 		t.angular.z = theta
-		self.pub_tf.publish(t)
+		self.pub.publish(t)
 
 
 	def on_data(self, data):
@@ -135,15 +139,17 @@ class Controller():
 		return euler
 
 	def on_tf(self, data):
-		transform = None
-		for d in data:
-			if d.header.frame_id == "odom":
-				transform = d.transform
-		if transform != None:
-			print transform
-			t = TransformStamped()
-			t.transform = transform
-			self.pub.publish(t)
+
+		pose = data.pose[1]
+
+		h = Header()
+		h.stamp = rospy.Time.now()
+
+		t = TransformStamped()
+		t.transform.translation = pose.position
+		t.transform.rotation = pose.orientation
+		t.header = h
+		self.pub_tf.publish(t)
 
 # Main function.
 if __name__ == '__main__':
