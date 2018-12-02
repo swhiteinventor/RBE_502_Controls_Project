@@ -69,13 +69,16 @@ class Controller():
 	def trajectory_tracking(self, desired_v, desired_theta):
 		#rospy.loginfo("traj tracking")
 
+		#calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
 		state_dot = self.calculate_derivatives()
+		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
 		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
 		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
 		desired_x_dot = desired_v
 		desired_y_dot = 0
 		desired_x_dot_dot = 0
 		desired_y_dot_dot = 0
+		# calculate the x,y position and velocity errors
 		error_x = self.calculate_error(self.current_state.x,desired_x)
 		error_y = self.calculate_error(self.current_state.y,desired_y)
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
