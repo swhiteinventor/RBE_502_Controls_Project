@@ -11,11 +11,12 @@ from std_msgs.msg import Empty, String, Header
 from math import cos, sin
 
 from std_msgs.msg import Empty, String
+import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
 from gazebo_msgs.msg import ModelStates
 from PID_Controller import PID_controller
 from DFL_Controller import DFL_controller
-#from NLF_Controller import NLF_controller
+from NLF_Controller import NLF_controller
 
 class Controller():
 
@@ -38,9 +39,9 @@ class Controller():
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 1
-		self.kp_2 = 1
-		self.kd_1 = 0.2
-		self.kd_2 = 0.2
+		self.kp_2 = .00001
+		self.kd_1 = 0.0001
+		self.kd_2 = 0.00005
 		
 		#initialize Non-Linear Feedback gains
 		self.c1 = 2
@@ -63,7 +64,7 @@ class Controller():
 		SIMULATION = True
 		if SIMULATION == True:
 			rospy.Subscriber('/gazebo/model_states', ModelStates, self.on_tf) 
-			self.pub_tf = rospy.Publisher('/vicon/turtlebot/turtlebot', TransformStamped, latch=True, queue_size=1)
+			self.pub_tf = rospy.Publisher('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, latch=True, queue_size=1)
 
 		rospy.spin()
 

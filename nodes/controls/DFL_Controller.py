@@ -8,4 +8,4 @@ def DFL_controller(controller, error_x, error_y, error_x_dot, error_y_dot, desir
 	v = desired_v
 	theta = (u2*cos(current_theta) - u1*sin(current_theta))/desired_v
 	
-	return -v, -theta
+	return -v, theta
