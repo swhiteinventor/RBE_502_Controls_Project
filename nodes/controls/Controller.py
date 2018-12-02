@@ -68,10 +68,12 @@ class Controller():
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
+		"""Given a desired velocity and angle, output velocity and angle will be caluclated"""
 		#rospy.loginfo("traj tracking")
 
 		#calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
 		state_dot = self.calculate_derivatives()
+		
 		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
 		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
 		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
@@ -79,14 +81,19 @@ class Controller():
 		desired_y_dot = 0
 		desired_x_dot_dot = 0
 		desired_y_dot_dot = 0
+		
 		# calculate the x,y position and velocity errors
 		error_x = self.calculate_error(self.current_state.x,desired_x)
 		error_y = self.calculate_error(self.current_state.y,desired_y)
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
 		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
 		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
+		
+		#calculate the current theta and velocity
 		current_theta = self.current_state.yaw
 		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		
+		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
 		error_theta = self.calculate_error(current_theta, desired_theta)
 		
@@ -100,6 +107,7 @@ class Controller():
 		return (v, theta)
 
 	def calculate_derivatives(self):
+		"""calculates the time derivative of the current stae"""
 		#rospy.loginfo("calc derivs")
 		delta_state = self.current_state - self.past_state
 		#calculates derivatives, where time (t) is the time step
@@ -107,12 +115,13 @@ class Controller():
 		return state_dot
 
 	def calculate_error(self, current, goal):
+		"""calculates the error between a given input and a desired input"""
 		#rospy.loginfo("calc error")
 		error = current - goal
 		return error
 
 	def moving_average(self, new_v, new_theta):
-		#takes in a new velocity and new theta command and returns the average velocity and theta command
+		"""takes in a new velocity and new theta command and returns the average velocity and theta command"""
 		self.v_array[self.array_iterator] = new_v
 		self.theta_array[self.array_iterator] = new_theta
 		v_average = np.mean(self.v_array)
