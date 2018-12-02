@@ -16,7 +16,7 @@ from geometry_msgs.msg import Twist, TransformStamped
 from gazebo_msgs.msg import ModelStates
 from PID_Controller import PID_controller
 from DFL_Controller import DFL_controller
-from NLF_Controller import NLF_controller
+#from NLF_Controller import NLF_controller
 
 class Controller():
 
@@ -38,10 +38,10 @@ class Controller():
 		self.kd_theta = .001
 
 		#initializes Dynamic Feedback Linearization gains
-		self.kp_1 = 1
-		self.kp_2 = .00001
-		self.kd_1 = 0.0001
-		self.kd_2 = 0.00005
+		self.kp_1 = 0.1
+		self.kp_2 = 0.1
+		self.kd_1 = 0.5
+		self.kd_2 = 0.5	
 		
 		#initialize Non-Linear Feedback gains
 		self.c1 = 2
@@ -82,9 +82,10 @@ class Controller():
 		error_y = self.calculate_error(self.current_state.y,desired_y)
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
 		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
-		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
-		error_v = self.calculate_error(current_v, desired_v)
+		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		current_theta = self.current_state.yaw
+		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		error_v = self.calculate_error(current_v, desired_v)
 		error_theta = self.calculate_error(current_theta, desired_theta)
 		
 		#runs chosen controller:
