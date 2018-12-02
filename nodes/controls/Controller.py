@@ -49,8 +49,8 @@ class Controller():
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		#self.controller = "PID"
-		self.controller = "DFL"
-		#self.controller = "NLF"
+		#self.controller = "DFL"
+		self.controller = "NLF"
 		
 		self.moving_avg_count = 5
 		self.array_iterator = 0
@@ -91,7 +91,7 @@ class Controller():
 		if self.controller == "DFL": #dynamic feedback linearization
 			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta)
 		elif self.controller == "NLF": #non-linear feedback
-			v, theta = NLF_Controller(controller, error_x, error_y, error_theta, desired_v, desired_theta)
+			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
 		else: #defaults to PID controller
 			v, theta = PID_controller(self, error_v, error_theta)
 		return (v, theta)
