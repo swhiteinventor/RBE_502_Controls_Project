@@ -25,8 +25,8 @@ class Controller():
 		#initializes PID gains
 		self.kp_v = 1
 		self.ki_v = 0
-		self.kd_v = .01
-		self.kp_theta = 1
+		self.kd_v = .1
+		self.kp_theta = .1
 		self.ki_theta = 0
 		self.kd_theta = .01
 
@@ -40,9 +40,10 @@ class Controller():
 		self.theta_array = [0]*self.moving_avg_count
 	
 		#change wand to turtlebot later
-		rospy.Subscriber('/vicon/turtlebot/turtlebot', TransformStamped, self.on_data) 
+		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
-
+		
+		SIMULATION = False
 		if SIMULATION == True:
 			rospy.Subscriber('/tf', TFMessage, self.on_tf) 
 			self.pub_tf = rospy.Publisher('/vicon/turtlebot/turtlebot', TransformStamped, latch=True, queue_size=1)
@@ -93,7 +94,7 @@ class Controller():
 	 	t.angular.x = 0
 		t.angular.y = 0
 		t.angular.z = theta
-		self.pub_tf.publish(t)
+		self.pub.publish(t)
 
 
 	def on_data(self, data):
