@@ -6,11 +6,16 @@ import Queue
 import numpy as np
 
 from Robot_State import Robot_State
+
+from math import cos, sin
+
 from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
 from tf2_msgs.msg import TFMessage
 from PID_Controller import PID_controller
+from DFL_Controller import DFL_controller
+#from NLF_Controller import NLF_controller
 
 class Controller():
 
@@ -62,16 +67,16 @@ class Controller():
 		#rospy.loginfo("traj tracking")
 
 		state_dot = self.calculate_derivatives()
-		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*self.state_dot.t
-		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*self.state_dot.t
+		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
+		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
 		desired_x_dot = desired_v
 		desired_y_dot = 0
 		desired_x_dot_dot = 0
 		desired_y_dot_dot = 0
 		error_x = self.calculate_error(self.current_state.x,desired_x)
 		error_y = self.calculate_error(self.current_state.y,desired_y)
-		error_x_dot = self.calculate_error(self.state_dot.x, desired_x_dot)
-		error_y_dot = self.calculate_error(self.state_dot.y, desired_y_dot)
+		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
+		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		error_v = self.calculate_error(current_v, desired_v)
 		current_theta = self.current_state.yaw
@@ -80,7 +85,7 @@ class Controller():
 		#runs chosen controller:
 		if self.controller == "DFL": #dynamic feedback linearization
 			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta)
-		else if self.controller == "NLF": #non-linear feedback
+		elif self.controller == "NLF": #non-linear feedback
 			v, theta = NLF_controller(self, error_v, error_theta)
 		else: #defaults to PID controller
 			v, theta = PID_controller(self, error_v, error_theta)
