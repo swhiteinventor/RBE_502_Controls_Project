@@ -3,6 +3,8 @@ from Robot_State import Robot_State
 
 past = Robot_State(0,0,0,0,0,0,0)
 curr = Robot_State(1,1,1,1,1,1,1)
+print "sub"
+print (curr - past).t
 extra = past
 
 print past
