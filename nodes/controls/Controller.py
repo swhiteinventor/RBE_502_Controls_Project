@@ -8,7 +8,7 @@ import numpy as np
 from Robot_State import Robot_State
 from std_msgs.msg import Empty, String, Header
 
-from math import cos, sin
+from math import cos, sin, pi
 
 from std_msgs.msg import Empty, String
 import tf.transformations
@@ -30,22 +30,22 @@ class Controller():
 
 		#initializes PID gains
 
-		self.kp_v = .1
+		self.kp_v = 1
 		self.ki_v = 0
-		self.kd_v = .1
-		self.kp_theta = .1
+		self.kd_v = 1
+		self.kp_theta = 1
 		self.ki_theta = 0
-		self.kd_theta = .001
+		self.kd_theta = .01
 
 		#initializes Dynamic Feedback Linearization gains
-		self.kp_1 = 1
-		self.kp_2 = .00001
-		self.kd_1 = 0.0001
-		self.kd_2 = 0.00005
+		self.kp_1 = 0.01
+		self.kp_2 = 0.001
+		self.kd_1 = 0.01
+		self.kd_2 = 0.005	
 		
 		#initialize Non-Linear Feedback gains
-		self.c1 = 2
-		self.c2 = 1
+		self.c1 = 10
+		self.c2 = 10
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
@@ -81,9 +81,10 @@ class Controller():
 		error_y = self.calculate_error(self.current_state.y,desired_y)
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
 		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
-		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
-		error_v = self.calculate_error(current_v, desired_v)
+		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		current_theta = self.current_state.yaw
+		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		error_v = self.calculate_error(current_v, desired_v)
 		error_theta = self.calculate_error(current_theta, desired_theta)
 		
 		#runs chosen controller:
@@ -124,7 +125,7 @@ class Controller():
 		v = max(-2, min(2, v))
 		theta = max(-2, min(2, theta))
 		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
-		t.linear.x = -v
+		t.linear.x = v
 		t.linear.y = 0
 		t.linear.z = 0
 	 	t.angular.x = 0
@@ -140,7 +141,7 @@ class Controller():
 		#rospy.loginfo(rospy.get_name() + " I got data %s", data)
 		
 		#sets the position data	
-		x = data.transform.translation.x #hi
+		x = data.transform.translation.x
 		y = data.transform.translation.y
 		z = data.transform.translation.z
 		
@@ -161,7 +162,7 @@ class Controller():
 
 		#calls the trajectory tracker
 		if self.past_state != None:
-			v, theta = self.trajectory_tracking(0.5, 0)
+			v, theta = self.trajectory_tracking(0.5, pi)
 			[v_average, theta_average] = self.moving_average(v,theta)
 			self.send_twist_message(v_average,theta_average)
 
