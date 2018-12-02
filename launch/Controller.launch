@@ -1,6 +1,8 @@
 
 <!-- Starts up everything needed to run the example listener/talker Python nodes. -->
 <launch>
+	<arg name="ctrl" default="PID"/>
+	<param name="cntrllr" value="$(arg ctrl)"/>
 
 	<!-- The listener node subscribes to the custom message that talker is publishing. -->
 	<node pkg="controls" type="Controller.py" name="Controller" output="screen" />

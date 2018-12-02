@@ -48,9 +48,7 @@ class Controller():
 		self.c2 = 1
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
-		#self.controller = "PID"
-		#self.controller = "DFL"
-		self.controller = "NLF"
+		self.controller = rospy.get_param("cntrllr")
 		
 		self.moving_avg_count = 5
 		self.array_iterator = 0
