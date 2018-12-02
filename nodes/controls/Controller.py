@@ -30,12 +30,12 @@ class Controller():
 
 		#initializes PID gains
 
-		self.kp_v = 1
+		self.kp_v = 1#1
 		self.ki_v = 0
-		self.kd_v = 1
-		self.kp_theta = 1
+		self.kd_v = 0#1
+		self.kp_theta = 1#1
 		self.ki_theta = 0
-		self.kd_theta = .01
+		self.kd_theta = 0#.01
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 0.01
@@ -89,12 +89,12 @@ class Controller():
 		error_y = self.calculate_error(self.current_state.y,desired_y)
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
 		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
-		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		
 		#calculate the current theta and velocity
 		current_theta = self.current_state.yaw
 		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
-		
+		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
+
 		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
 		error_theta = self.calculate_error(current_theta, desired_theta)
@@ -106,6 +106,8 @@ class Controller():
 			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
 		else: #defaults to PID controller
 			v, theta = PID_controller(self, error_v, error_theta)
+
+		rospy.loginfo("current_v=%.2f, current_theta=%.2f, error_v=%.2f, error_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, theta*180/pi))
 		return (v, theta)
 
 	def calculate_derivatives(self):
@@ -117,9 +119,9 @@ class Controller():
 		return state_dot
 
 	def calculate_error(self, current, goal):
-		"""calculates the error between a given input and a desired input"""
+		"""calculates the error between a desired input and a given input"""
 		#rospy.loginfo("calc error")
-		error = current - goal
+		error = goal - current
 		return error
 
 	def moving_average(self, new_v, new_theta):
@@ -138,7 +140,7 @@ class Controller():
 		t = Twist()
 		v = max(-2, min(2, v))
 		theta = max(-2, min(2, theta))
-		rospy.loginfo("linear x: %.4f angular z: %.4f" % (v, theta))
+		#rospy.loginfo("Current theta: %.4f. Commanded v: %.4f, theta: %.4f" % (self.current_state.yaw*180/pi, v, theta*180/pi))
 		t.linear.x = v
 		t.linear.y = 0
 		t.linear.z = 0
@@ -176,8 +178,21 @@ class Controller():
 
 		#calls the trajectory tracker
 		if self.past_state != None:
-			v, theta = self.trajectory_tracking(0.5, pi)
+			
+			#set velocity in m/s:
+			velocity = 0.25
+			
+			#set desired theta in degrees:
+			angle = 0
+
+			#calculates controller:
+			v, theta = self.trajectory_tracking(velocity, angle*pi/180)
+			
+			#averages recent commands for smooth operation
 			[v_average, theta_average] = self.moving_average(v,theta)
+			#[v_average, theta_average] = [v, theta]
+
+			#sends commands to robot
 			self.send_twist_message(v_average,theta_average)
 
 	def quaternion_to_euler(self, quaternion):
