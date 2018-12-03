@@ -38,10 +38,10 @@ class Controller():
 		self.kd_theta = 0#.01
 
 		#initializes Dynamic Feedback Linearization gains
-		self.kp_1 = 0.01
-		self.kp_2 = 0.001
-		self.kd_1 = 0.01
-		self.kd_2 = 0.005	
+		self.kp_1 = 1#0.01
+		self.kp_2 = 1#0.001
+		self.kd_1 = 1#0.01
+		self.kd_2 = 1#0.005	
 		
 		#initialize Non-Linear Feedback gains
 		self.c1 = 10
@@ -79,8 +79,8 @@ class Controller():
 		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
 		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
 		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
-		desired_x_dot = desired_v
-		desired_y_dot = 0
+		desired_x_dot = desired_v*cos(desired_theta)
+		desired_y_dot = desired_v*sin(desired_theta)
 		desired_x_dot_dot = 0
 		desired_y_dot_dot = 0
 		
@@ -101,13 +101,13 @@ class Controller():
 		
 		#runs chosen controller:
 		if self.controller == "DFL": #dynamic feedback linearization
-			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta)
+			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
 		elif self.controller == "NLF": #non-linear feedback
 			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
 		else: #defaults to PID controller
 			v, theta = PID_controller(self, error_v, error_theta, desired_v)
 
-		rospy.loginfo("current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi))
+		#rospy.loginfo("current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi))
 		return (v, theta)
 
 	def calculate_derivatives(self):
