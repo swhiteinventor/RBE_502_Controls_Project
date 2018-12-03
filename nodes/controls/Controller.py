@@ -135,8 +135,7 @@ class Controller():
 			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
 			sys.exit(0)
 
-		#rospy.loginfo("current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi))
-		print "current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi)
+		print "current_v=%.2f, current_theta=%.2f,error_v=%.2f, error_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, theta*180/pi)
 		return (v, theta)
 
 	def calculate_derivatives(self):
@@ -216,7 +215,7 @@ class Controller():
 					velocity = 0.25
 					
 					#set desired theta in degrees:
-					angle = 30
+					angle = 0
 
 					#calculates controller:
 					v, theta = self.trajectory_tracking(velocity, angle*pi/180)
