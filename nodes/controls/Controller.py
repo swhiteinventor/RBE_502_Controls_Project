@@ -105,9 +105,9 @@ class Controller():
 		elif self.controller == "NLF": #non-linear feedback
 			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
 		else: #defaults to PID controller
-			v, theta = PID_controller(self, error_v, error_theta)
+			v, theta = PID_controller(self, error_v, error_theta, desired_v)
 
-		rospy.loginfo("current_v=%.2f, current_theta=%.2f, error_v=%.2f, error_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, theta*180/pi))
+		rospy.loginfo("current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi))
 		return (v, theta)
 
 	def calculate_derivatives(self):
@@ -172,28 +172,35 @@ class Controller():
 		#grabs the current time stamp
 		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
 
-		#set states
-		self.past_state = self.current_state
-		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
+		#set states if new state time is unique
+		if self.current_state != None:
+			if current_time == self.current_state.t:
+				pass
+			else:
+				self.past_state = self.current_state
+				self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
-		#calls the trajectory tracker
-		if self.past_state != None:
-			
-			#set velocity in m/s:
-			velocity = 0.25
-			
-			#set desired theta in degrees:
-			angle = 0
+				#calls the trajectory tracker
+				if self.past_state != None:
+					
+					#set velocity in m/s:
+					velocity = 0.25
+					
+					#set desired theta in degrees:
+					angle = 30
 
-			#calculates controller:
-			v, theta = self.trajectory_tracking(velocity, angle*pi/180)
-			
-			#averages recent commands for smooth operation
-			[v_average, theta_average] = self.moving_average(v,theta)
-			#[v_average, theta_average] = [v, theta]
+					#calculates controller:
+					v, theta = self.trajectory_tracking(velocity, angle*pi/180)
+					
+					#averages recent commands for smooth operation
+					[v_average, theta_average] = self.moving_average(v,theta)
+					#[v_average, theta_average] = [v, theta]
 
-			#sends commands to robot
-			self.send_twist_message(v_average,theta_average)
+					#sends commands to robot
+					self.send_twist_message(v_average,theta_average)
+		else:
+			self.past_state = self.current_state
+			self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""

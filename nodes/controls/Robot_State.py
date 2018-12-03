@@ -33,9 +33,6 @@ class Robot_State():
 	def divide_by_time(self):
 		a = self
 		r = Robot_State()
-
-		if a.t == 0.0:
-			a.t = 1E-9
 			
 		r.x = a.x/a.t
 		r.y = a.y/a.t
