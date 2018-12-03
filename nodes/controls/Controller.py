@@ -32,11 +32,11 @@ class Controller():
 		#initializes PID gains
 
 		self.kp_v = 1#1
-		self.ki_v = 0
+		self.ki_v = .00
 		self.kd_v = 1#1
-		self.kp_theta = 10#1
-		self.ki_theta = 0
-		self.kd_theta = 10#.01
+		self.kp_theta = 1#1
+		self.ki_theta = .00
+		self.kd_theta = 1#.01
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 1#0.01
@@ -47,6 +47,9 @@ class Controller():
 		#initialize Non-Linear Feedback gains
 		self.c1 = 10
 		self.c2 = 10
+
+		self.v_area = 0
+		self.theta_area = 0
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
@@ -111,9 +114,21 @@ class Controller():
 			last_theta = self.store_theta
 		self.store_theta = current_theta
 
+		delta_t = (self.current_state.t - self.past_state.t)
+		delta_v = (current_v - last_v)
+		delta_theta = (current_theta - last_theta)
+
+		v_rect_area = current_v*delta_t
+		v_tri_area = delta_v*delta_t/2.0
+		self.v_area += (v_rect_area - v_tri_area)
+
+		theta_rect_area = current_theta*delta_t
+		theta_tri_area = delta_theta*delta_t/2.0
+		self.theta_area += (theta_rect_area - theta_tri_area)
+
 		#print "cv: %f lv: %f\tctheta: %f ltheta: %f\tct: %f lt: %f" % (current_v, last_v, current_theta, last_theta, self.current_state.t, self.past_state.t)
-		current_v_dot = (current_v - last_v)/(self.current_state.t - self.past_state.t)
-		current_theta_dot = (current_theta - last_theta)/(self.current_state.t - self.past_state.t)
+		current_v_dot = delta_v/delta_t
+		current_theta_dot = delta_theta/delta_t
 
 		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
