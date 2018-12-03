@@ -4,6 +4,7 @@ import roslib; roslib.load_manifest('controls')
 import rospy
 import Queue
 import numpy as np
+import sys
 
 from Robot_State import Robot_State
 from std_msgs.msg import Empty, String, Header
@@ -32,10 +33,10 @@ class Controller():
 
 		self.kp_v = 1#1
 		self.ki_v = 0
-		self.kd_v = 0#1
-		self.kp_theta = 1#1
+		self.kd_v = 1#1
+		self.kp_theta = 10#1
 		self.ki_theta = 0
-		self.kd_theta = 0#.01
+		self.kd_theta = 10#.01
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 1#0.01
@@ -94,20 +95,48 @@ class Controller():
 		current_theta = self.current_state.yaw
 		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
 		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
+		
+		try:
+			last_v = self.store_v
+		except:
+			self.store_v = current_v
+			last_v = self.store_v
+			pass
+		self.store_v = current_v
+
+		try:
+			last_theta = self.store_theta
+		except:
+			self.store_theta = current_theta
+			last_theta = self.store_theta
+		self.store_theta = current_theta
+
+		#print "cv: %f lv: %f\tctheta: %f ltheta: %f\tct: %f lt: %f" % (current_v, last_v, current_theta, last_theta, self.current_state.t, self.past_state.t)
+		current_v_dot = (current_v - last_v)/(self.current_state.t - self.past_state.t)
+		current_theta_dot = (current_theta - last_theta)/(self.current_state.t - self.past_state.t)
 
 		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
 		error_theta = self.calculate_error(current_theta, desired_theta)
+
+		desired_v_dot = 0
+		desired_theta_dot = 0
+		error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
+		error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
 		
 		#runs chosen controller:
 		if self.controller == "DFL": #dynamic feedback linearization
 			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
 		elif self.controller == "NLF": #non-linear feedback
 			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
-		else: #defaults to PID controller
-			v, theta = PID_controller(self, error_v, error_theta, desired_v)
+		elif self.controller == "PID": #PID controller
+			v, theta = PID_controller(self, error_v, error_v_dot, error_theta, error_theta_dot, desired_v)
+		else:
+			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
+			sys.exit(0)
 
 		#rospy.loginfo("current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi))
+		print "current_v=%.2f, current_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, v, theta*180/pi)
 		return (v, theta)
 
 	def calculate_derivatives(self):
@@ -226,7 +255,7 @@ class Controller():
 if __name__ == '__main__':
 	# Initialize the node and name it.
 	print "Initiating server node..."
-	rospy.init_node('PID_Controller')
+	rospy.init_node('Controller')
     
 	try:
 		controller_server = Controller()
