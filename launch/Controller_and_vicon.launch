@@ -4,6 +4,7 @@
 
 	<arg name="ctrl" default="PID"/>
 	<param name="cntrllr" value="$(arg ctrl)"/>
+	<param name="simulation" value="False"/>
 
 	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
 	<param name="stream_mode" value="ClientPull" type="str" />

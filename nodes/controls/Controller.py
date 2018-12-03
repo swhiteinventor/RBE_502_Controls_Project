@@ -32,11 +32,11 @@ class Controller():
 		#initializes PID gains
 
 		self.kp_v = 1#1
-		self.ki_v = .00
-		self.kd_v = 1#1
+		self.ki_v = 0
+		self.kd_v = 0#1
 		self.kp_theta = 1#1
-		self.ki_theta = .00
-		self.kd_theta = 1#.01
+		self.ki_theta = 0
+		self.kd_theta = 0#.01
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 1#0.01
