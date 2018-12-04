@@ -6,6 +6,8 @@ import Queue
 import numpy as np
 import sys
 
+#from rospy.Time import now
+
 from Robot_State import Robot_State
 from std_msgs.msg import Empty, String, Header
 
@@ -31,9 +33,9 @@ class Controller():
 
 		#initializes PID gains
 
-		self.kp_v = 1#1
+		self.kp_v = .7#1
 		self.ki_v = 0
-		self.kd_v = 0#1
+		self.kd_v = .0
 		self.kp_theta = 1#1
 		self.ki_theta = 0
 		self.kd_theta = 0#.01
@@ -50,6 +52,8 @@ class Controller():
 
 		self.v_area = 0
 		self.theta_area = 0
+
+		self.previous_ = rospy.get_time()
 
 		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
@@ -102,8 +106,10 @@ class Controller():
 		#print "Current Velocity: ", current_v
 
 		sign = -1 if current_v < 0 else 1 if current_v > 0 else 0
-		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
+		current_v = sign * ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		
+		#current_v = state_dot.x
+			
 		try:
 			last_v = self.store_v
 		except:
@@ -203,7 +209,11 @@ class Controller():
 		
 		"""Callback function that handle subscriber data and updates self."""
 		#rospy.loginfo(rospy.get_name() + " I got data %s", data)
-		
+		desired_ = .2
+		if ((rospy.get_time() - self.previous_) > desired_):
+			self.previous_ = rospy.get_time()	
+		else:
+			return None
 		#sets the position data	
 		x = data.transform.translation.x
 		y = data.transform.translation.y
@@ -232,16 +242,17 @@ class Controller():
 				if self.past_state != None:
 					
 					#set velocity in m/s:
-					velocity = 0.25
+					velocity = 0.1
 					
 					#set desired theta in degrees:
-					angle = 0
+					angle = 30
 
 					#calculates controller:
 					v, theta = self.trajectory_tracking(velocity, angle*pi/180)
 					
 					#averages recent commands for smooth operation
 					[v_average, theta_average] = self.moving_average(v,theta)
+					v_average, theta_average = v, theta
 					#[v_average, theta_average] = [v, theta]
 
 					#sends commands to robot
