@@ -50,7 +50,7 @@ class Controller():
 		self.kd_2 = 1#0.005	
 		
 		#initialize Non-Linear Feedback gains
-		self.c1 = 10
+		self.c1 = 5
 		self.c2 = 10
 
 		self.v_area = 0
@@ -88,12 +88,12 @@ class Controller():
 		state_dot = self.calculate_derivatives()
 		
 		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
-		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
-		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
+		#desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
+		#desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
 		
 		#test to see if we can track a line
-		#desired_x = self.start.x + cos(desired_theta)*desired_v*(self.current_state.t-self.start.t)
-		#desired_y = self.start.y + sin(desired_theta)*desired_v*(self.current_state.t-self.start.t)
+		desired_x = self.start.x + cos(desired_theta)*desired_v*(self.current_state.t-self.start.t)
+		desired_y = self.start.y + sin(desired_theta)*desired_v*(self.current_state.t-self.start.t)
 
 		desired_x_dot = desired_v*cos(desired_theta)
 		desired_y_dot = desired_v*sin(desired_theta)
