@@ -258,11 +258,10 @@ class Controller():
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
 					
 					#averages recent commands for smooth operation
-					[v_average, omega_average] = self.moving_average(v,omega)
-					v_average, omega_average = v, omega
+					#[v_average, omega_average] = self.moving_average(v,omega)
 
 					#sends commands to robot
-					self.send_twist_message(v_average, omega_average)
+					self.send_twist_message(v, omega)
 		else:
 			self.past_state = self.current_state
 			self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
