@@ -1,4 +1,5 @@
 Put tasks in here:
+ - fix PID velocity
  - implement line tracking
  - Tune all controller gains on real robot
  - Test implemention of data capture
