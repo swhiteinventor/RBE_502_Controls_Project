@@ -58,7 +58,7 @@ class Controller():
 		self.moving_avg_count = 5
 		self.array_iterator = 0
 		self.v_array = [0]*self.moving_avg_count
-		self.theta_array = [0]*self.moving_avg_count
+		self.omega_array = [0]*self.moving_avg_count
 		
 		#change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
@@ -97,8 +97,9 @@ class Controller():
 		#calculate the current theta and velocity
 		current_theta = self.current_state.yaw
 		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		#current_v_signed = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
 		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
-		
+		#current_v = current_v_signed/abs(current_v_signed)*current_v
 		try:
 			last_v = self.store_v
 		except:
@@ -136,22 +137,23 @@ class Controller():
 
 		desired_v_dot = 0
 		desired_theta_dot = 0
+		desired_omega = desired_theta_dot
 		error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
 		error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
 		
 		#runs chosen controller:
 		if self.controller == "DFL": #dynamic feedback linearization
-			v, theta = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
+			v, omega = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
 		elif self.controller == "NLF": #non-linear feedback
-			v, theta = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_theta)
+			v, omega = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_omega)
 		elif self.controller == "PID": #PID controller
-			v, theta = PID_controller(self, error_v, error_v_dot, error_theta, error_theta_dot, desired_v)
+			v, omega = PID_controller(self, error_v, error_v_dot, error_theta, error_theta_dot, desired_v)
 		else:
 			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
 			sys.exit(0)
 
-		print "current_v=%.2f, current_theta=%.2f,error_v=%.2f, error_theta=%.2f, v=%.2f, theta=%.2f" % (current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, theta*180/pi)
-		return (v, theta)
+		print "t=%.4f, current_v=%.4f m/s, current_theta=%.2f deg, error_v=%.2f, error_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.t, current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, omega*180/pi)
+		return (v, omega)
 
 	def calculate_derivatives(self):
 		"""calculates the time derivative of the current stae"""
@@ -167,29 +169,29 @@ class Controller():
 		error = goal - current
 		return error
 
-	def moving_average(self, new_v, new_theta):
-		"""takes in a new velocity and new theta command and returns the average velocity and theta command"""
+	def moving_average(self, new_v, new_omega):
+		"""takes in a new velocity and new omega command and returns the average velocity and omega command"""
 		self.v_array[self.array_iterator] = new_v
-		self.theta_array[self.array_iterator] = new_theta
+		self.omega_array[self.array_iterator] = new_omega
 		v_average = np.mean(self.v_array)
-		theta_average = np.mean(self.theta_array)
+		omega_average = np.mean(self.omega_array)
 		self.array_iterator += 1
 		if self.array_iterator == self.moving_avg_count:
 			self.array_iterator = 0
-		return [v_average, theta_average]
+		return [v_average, omega_average]
 
-	def send_twist_message(self, v, theta):
+	def send_twist_message(self, v, omega):
 		"""takes in the velocity and theta"""
 		t = Twist()
 		v = max(-2, min(2, v))
-		theta = max(-2, min(2, theta))
-		#rospy.loginfo("Current theta: %.4f. Commanded v: %.4f, theta: %.4f" % (self.current_state.yaw*180/pi, v, theta*180/pi))
+		omega = max(-2, min(2, omega))
+		#rospy.loginfo("Current theta: %.4f. Commanded v: %.4f, omega: %.4f" % (self.current_state.yaw*180/pi, v, theta*180/pi))
 		t.linear.x = v
 		t.linear.y = 0
 		t.linear.z = 0
 	 	t.angular.x = 0
 		t.angular.y = 0
-		t.angular.z = theta
+		t.angular.z = omega
 		self.pub.publish(t)
 
 
@@ -233,14 +235,14 @@ class Controller():
 					angle = 0
 
 					#calculates controller:
-					v, theta = self.trajectory_tracking(velocity, angle*pi/180)
+					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
 					
 					#averages recent commands for smooth operation
-					[v_average, theta_average] = self.moving_average(v,theta)
-					#[v_average, theta_average] = [v, theta]
+					[v_average, omega_average] = self.moving_average(v,omega)
+					#[v_average, omega_average] = [v, omega]
 
 					#sends commands to robot
-					self.send_twist_message(v_average,theta_average)
+					self.send_twist_message(v_average, omega_average)
 		else:
 			self.past_state = self.current_state
 			self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
