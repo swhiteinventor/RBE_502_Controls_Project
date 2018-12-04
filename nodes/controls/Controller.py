@@ -97,9 +97,18 @@ class Controller():
 		#calculate the current theta and velocity
 		current_theta = self.current_state.yaw
 		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+
 		#current_v_signed = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
 		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
 		#current_v = current_v_signed/abs(current_v_signed)*current_v
+
+		#print state_dot
+		#print "Current Theta: ", current_theta
+		#print "Current Velocity: ", current_v
+
+		sign = -1 if current_v < 0 else 1 if current_v > 0 else 0
+		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
+
 		try:
 			last_v = self.store_v
 		except:
@@ -232,7 +241,7 @@ class Controller():
 					velocity = 0.25
 					
 					#set desired theta in degrees:
-					angle = 0
+					angle = 30
 
 					#calculates controller:
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)

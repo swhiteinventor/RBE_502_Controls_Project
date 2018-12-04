@@ -57,3 +57,8 @@ class Robot_State():
 		r.t = a.t - b.t
 
 		return r
+
+	def __str__(self):
+		a = self
+
+		return "Robot State:\n  x: %.4f y: %.4f z: %.4f\n  roll: %.4f pitch: %.4f yaw: %.4f\n  t: %.4f" % (a.x, a.y, a.z, a.roll, a.pitch, a.yaw, a.t)
