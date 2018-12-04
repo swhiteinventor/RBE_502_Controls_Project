@@ -116,7 +116,7 @@ if clock_msgs:
 
 if (cmd_vel_msgs):
 	cmd_vx = [0 for x in xrange(cmd_vel_msgs)]
-	cmd_wz = cmd_vx
+	cmd_wz = [0 for x in xrange(cmd_vel_msgs)]
 	# cmd vel
 
 	pt = 0
@@ -132,13 +132,13 @@ if (cmd_vel_msgs):
 
 if (vicon_msgs):
 	vicon_time = [0 for x in xrange(vicon_msgs)]
-	vicon_px    = vicon_time
-	vicon_py    = vicon_time
-	vicon_pz    = vicon_time
-	vicon_ox    = vicon_time
-	vicon_oy    = vicon_time
-	vicon_oz    = vicon_time
-	vicon_ow    = vicon_time
+	vicon_px    = [0 for x in xrange(vicon_msgs)]
+	vicon_py    = [0 for x in xrange(vicon_msgs)]
+	vicon_pz    = [0 for x in xrange(vicon_msgs)]
+	vicon_ox    = [0 for x in xrange(vicon_msgs)]
+	vicon_oy    = [0 for x in xrange(vicon_msgs)]
+	vicon_oz    = [0 for x in xrange(vicon_msgs)]
+	vicon_ow    = [0 for x in xrange(vicon_msgs)]
 
 	pt = 0
 
@@ -181,10 +181,10 @@ if (cmd_vel_msgs):
 	print "  tmin=",str(tmin0),"  tmax=",str(tmax0)
 
 	fig_cmd = plt.figure()
-	ax_cmd = fig_cmd.add_subplot(211)
+	ax_cmd = fig_cmd.add_subplot(111)
 	ax_cmd.hold(True)
 	ax_cmd.plot(time,cmd_vx,'r')
-	ax_cmd.plot(time,cmd_wz,'g*')
+	ax_cmd.plot(time,cmd_wz,'g')
 	ax_cmd.axis([tmin0, tmax0, vxmin0, vxmax0])
 
 	ax_cmd.set_ylabel('m/s rad/s')
@@ -203,10 +203,10 @@ if (vicon_msgs):
 	print "  tmin=",str(tmin0),"  tmax=",str(tmax0)
 
 	fig_cmd = plt.figure()
-	ax_cmd = fig_cmd.add_subplot(211)
+	ax_cmd = fig_cmd.add_subplot(111)
 	ax_cmd.hold(True)
 	ax_cmd.plot(vicon_time,vicon_px,'r')
-	ax_cmd.plot(vicon_time,vicon_py,'g*')
+	ax_cmd.plot(vicon_time,vicon_py,'g')
 	ax_cmd.plot(vicon_time,vicon_pz,'b')
 	ax_cmd.axis([tmin0, tmax0, pmin0, pmax0])
 
