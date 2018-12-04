@@ -30,6 +30,7 @@ class Controller():
 		#initializes the robot's position and orientation and time
 		self.past_state = None
 		self.current_state = None
+		self.start = None
 
 		#initializes PID gains
 
@@ -87,6 +88,11 @@ class Controller():
 		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
 		desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
 		desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
+		
+		#test to see if we can track a line
+		#desired_x = self.start.x + cos(desired_theta)*desired_v*(self.current_state.t-self.start.t)
+		#desired_y = self.start.y + sin(desired_theta)*desired_v*(self.current_state.t-self.start.t)
+
 		desired_x_dot = desired_v*cos(desired_theta)
 		desired_y_dot = desired_v*sin(desired_theta)
 		desired_x_dot_dot = 0
@@ -117,17 +123,16 @@ class Controller():
 
 		try:
 			last_v = self.store_v
+			last_theta = self.store_theta
+		
 		except:
 			self.store_v = current_v
 			last_v = self.store_v
-			pass
-		self.store_v = current_v
 
-		try:
-			last_theta = self.store_theta
-		except:
 			self.store_theta = current_theta
 			last_theta = self.store_theta
+
+		self.store_v = current_v
 		self.store_theta = current_theta
 
 		delta_t = (self.current_state.t - self.past_state.t)
@@ -245,6 +250,10 @@ class Controller():
 				self.past_state = self.current_state
 				self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
+				#runs only once and grabs the beginning state
+				if self.start == None:
+					self.start = self.current_state
+
 				#calls the trajectory tracker
 				if self.past_state != None:
 					
@@ -252,17 +261,16 @@ class Controller():
 					velocity = 0.25
 					
 					#set desired theta in degrees:
-					angle = 30
+					angle = 0
 
 					#calculates controller:
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
 					
 					#averages recent commands for smooth operation
-					[v_average, omega_average] = self.moving_average(v,omega)
-					v_average, omega_average = v, omega
+					#[v_average, omega_average] = self.moving_average(v,omega)
 
 					#sends commands to robot
-					self.send_twist_message(v_average, omega_average)
+					self.send_twist_message(v, omega)
 		else:
 			self.past_state = self.current_state
 			self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)

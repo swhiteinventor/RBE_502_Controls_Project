@@ -1,7 +1,5 @@
 Put tasks in here:
- - Fix theta (see committed code)
- - Fix NLF controller (equation is wrong -- se committed code)
- - merge in 20Hz, remove moving average
+ - fix PID velocity
  - implement line tracking
  - Tune all controller gains on real robot
  - Test implemention of data capture
