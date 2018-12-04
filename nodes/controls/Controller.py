@@ -215,7 +215,8 @@ class Controller():
 		
 		"""Callback function that handle subscriber data and updates self."""
 		#rospy.loginfo(rospy.get_name() + " I got data %s", data)
-		desired_ = .2
+		#set desired data rate:
+		desired_ = .2 #sec
 		if ((rospy.get_time() - self.previous_) > desired_):
 			self.previous_ = rospy.get_time()	
 		else:
@@ -248,7 +249,7 @@ class Controller():
 				if self.past_state != None:
 					
 					#set velocity in m/s:
-					velocity = 0.1
+					velocity = 0.25
 					
 					#set desired theta in degrees:
 					angle = 30
@@ -257,8 +258,8 @@ class Controller():
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
 					
 					#averages recent commands for smooth operation
-					[v_average, theta_average] = self.moving_average(v,omega)
-					v_average, theta_average = v, omega
+					[v_average, omega_average] = self.moving_average(v,omega)
+					v_average, omega_average = v, omega
 
 					#sends commands to robot
 					self.send_twist_message(v_average, omega_average)
