@@ -36,12 +36,12 @@ class Controller():
 		self.start = None
 
 		#initializes PID gains
-		self.kp_v = .7#1
-		self.ki_v = 0
-		self.kd_v = .0
-		self.kp_theta = 1#1
-		self.ki_theta = 0
-		self.kd_theta = 0#.01
+		self.kp_x = .7#1
+		self.ki_x = 0
+		self.kd_x = .0
+		self.kp_y = 1#1
+		self.ki_y = 0
+		self.kd_y = 0#.01
 
 		#initializes Dynamic Feedback Linearization gains
 		self.kp_1 = 1#0.01
@@ -53,8 +53,8 @@ class Controller():
 		self.c1 = 5
 		self.c2 = 10
 
-		self.v_area = 0
-		self.theta_area = 0
+		self.area_x = 0
+		self.area_y = 0
 
 		self.previous_ = rospy.get_time()
 
@@ -123,35 +123,9 @@ class Controller():
 			
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
 
-		try:
-			last_v = self.store_v
-			last_theta = self.store_theta
-		
-		except:
-			self.store_v = current_v
-			last_v = self.store_v
-
-			self.store_theta = current_theta
-			last_theta = self.store_theta
-
-		self.store_v = current_v
-		self.store_theta = current_theta
-
-		delta_t = (self.current_state.t - self.past_state.t)
-		delta_v = (current_v - last_v)
-		delta_theta = (current_theta - last_theta)
-
-		v_rect_area = current_v*delta_t
-		v_tri_area = delta_v*delta_t/2.0
-		self.v_area += (v_rect_area - v_tri_area)
-
-		theta_rect_area = current_theta*delta_t
-		theta_tri_area = delta_theta*delta_t/2.0
-		self.theta_area += (theta_rect_area - theta_tri_area)
-
-		#print "cv: %f lv: %f\tctheta: %f ltheta: %f\tct: %f lt: %f" % (current_v, last_v, current_theta, last_theta, self.current_state.t, self.past_state.t)
-		current_v_dot = delta_v/delta_t
-		current_theta_dot = delta_theta/delta_t
+		#calculate integrals for PID
+		self.area_x += calculate_ integral(self.current_state.x, self.past_state.x, self.state_dot.t)
+		self.area_y += calculate_ integral(self.current_state.y, self.past_state.y, self.state_dot.t)
 
 		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
@@ -176,6 +150,18 @@ class Controller():
 
 		print "t=%.4f, current_v=%.4f m/s, current_theta=%.2f deg, error_v=%.2f, error_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.t, current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, omega*180/pi)
 		return (v, omega)
+
+	def calculate integral(self, current, last, delta_t):
+		#calculate difference:
+		delta = current - last
+		#calculate rectangular area:
+		rect_area = current*delta_t
+		#calculate triangular area:
+		tri_area = delta*delta*t/2
+		#calculate area under the curve:
+		area = rect_area - tri_area
+
+		return area
 
 	def calculate_derivatives(self):
 		"""calculates the time derivative of the current stae"""
