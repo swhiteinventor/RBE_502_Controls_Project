@@ -27,13 +27,15 @@ class Controller():
 		"""initializes the controls node"""
 		rospy.loginfo("Server node started.")
 	
+		self.velocity = .25
+		self.angle = 0
+
 		#initializes the robot's position and orientation and time
 		self.past_state = None
 		self.current_state = None
 		self.start = None
 
 		#initializes PID gains
-
 		self.kp_v = .7#1
 		self.ki_v = 0
 		self.kd_v = .0
@@ -258,10 +260,10 @@ class Controller():
 				if self.past_state != None:
 					
 					#set velocity in m/s:
-					velocity = 0.25
+					velocity = self.velocity
 					
 					#set desired theta in degrees:
-					angle = 0
+					angle = self.angle
 
 					#calculates controller:
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
