@@ -44,14 +44,14 @@ class Controller():
 		self.kd_theta = 0#.01
 
 		#initializes Dynamic Feedback Linearization gains
-		self.kp_1 = 1#0.01
-		self.kp_2 = 1#0.001
-		self.kd_1 = 1#0.01
-		self.kd_2 = 1#0.005	
+		self.kp_1 = .5#0.01
+		self.kp_2 = .5#0.001
+		self.kd_1 = .05#0.01
+		self.kd_2 = .05#0.005	
 		
 		#initialize Non-Linear Feedback gains
-		self.c1 = 5
-		self.c2 = 10
+		self.c1 = .5
+		self.c2 = 1
 
 		self.v_area = 0
 		self.theta_area = 0
