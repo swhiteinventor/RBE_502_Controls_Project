@@ -44,6 +44,7 @@ class Controller():
 		self.kd_y = 0
 
 		#initializes Dynamic Feedback Linearization gains
+
 		self.kp_1 = 0.5#1
 		self.kp_2 = 0.5#1
 		self.kd_1 = 0.05#1
