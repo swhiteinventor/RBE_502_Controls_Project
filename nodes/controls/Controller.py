@@ -27,8 +27,8 @@ class Controller():
 		"""initializes the controls node"""
 		rospy.loginfo("Server node started.")
 	
-		self.velocity = .25
-		self.angle = 0
+		self.velocity = .25 #m/s
+		self.angle = 0 #degrees
 
 		#initializes the robot's position and orientation and time
 		self.past_state = None
@@ -125,8 +125,8 @@ class Controller():
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
 
 		#calculate integrals for PID
-		self.area_x += calculate_ integral(self.current_state.x, self.past_state.x, self.state_dot.t)
-		self.area_y += calculate_ integral(self.current_state.y, self.past_state.y, self.state_dot.t)
+		self.area_x += self.calculate_integral(self.current_state.x, self.past_state.x, state_dot.t)
+		self.area_y += self.calculate_integral(self.current_state.y, self.past_state.y, state_dot.t)
 
 		#calculate the error in velocity and theta
 		error_v = self.calculate_error(current_v, desired_v)
@@ -135,8 +135,8 @@ class Controller():
 		desired_v_dot = 0
 		desired_theta_dot = 0
 		desired_omega = desired_theta_dot
-		error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
-		error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
+		#error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
+		#error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
 		
 		#runs chosen controller:
 		if self.controller == "DFL": #dynamic feedback linearization
@@ -144,7 +144,7 @@ class Controller():
 		elif self.controller == "NLF": #non-linear feedback
 			v, omega = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_omega)
 		elif self.controller == "PID": #PID controller
-			v, omega = PID_controller(self, error_v, error_v_dot, error_theta, error_theta_dot, desired_v)
+			v, omega = PID_controller(self, error_x, error_y, error_x_dot, error_y_dot, state_dot.t, current_theta)
 		else:
 			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
 			sys.exit(0)
@@ -152,16 +152,16 @@ class Controller():
 		print "t=%.4f, current_v=%.4f m/s, current_theta=%.2f deg, error_v=%.2f, error_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.t, current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, omega*180/pi)
 		return (v, omega)
 
-	def calculate integral(self, current, last, delta_t):
+
+	def calculate_integral(self, current, last, delta_t):
 		#calculate difference:
 		delta = current - last
 		#calculate rectangular area:
 		rect_area = current*delta_t
 		#calculate triangular area:
-		tri_area = delta*delta*t/2
+		tri_area = delta*delta_t/2
 		#calculate area under the curve:
 		area = rect_area - tri_area
-
 		return area
 
 	def calculate_derivatives(self):
