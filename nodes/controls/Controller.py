@@ -36,22 +36,22 @@ class Controller():
 		self.start = None
 
 		#initializes PID gains
-		self.kp_x = .7#1
+		self.kp_x = 0.7
 		self.ki_x = 0
-		self.kd_x = .0
-		self.kp_y = 1#1
+		self.kd_x = 0
+		self.kp_y = 1
 		self.ki_y = 0
-		self.kd_y = 0#.01
+		self.kd_y = 0
 
 		#initializes Dynamic Feedback Linearization gains
-		self.kp_1 = 1#0.01
-		self.kp_2 = 1#0.001
-		self.kd_1 = 1#0.01
-		self.kd_2 = 1#0.005	
+		self.kp_1 = 0.5#1
+		self.kp_2 = 0.5#1
+		self.kd_1 = 0.05#1
+		self.kd_2 = 0.05#1	
 		
 		#initialize Non-Linear Feedback gains
-		self.c1 = 5
-		self.c2 = 10
+		self.c1 = 0.5#5
+		self.c2 = 1#10
 
 		self.area_x = 0
 		self.area_y = 0
