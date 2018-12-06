@@ -1,3 +1,10 @@
+<!--
+Duplicon of default vicon_bridge with optional IP argument
+
+optional args:
+	ip:=[ x.x.x.x ]	: Launch vicon with specified IP (default: 130.215.206.205)
+-->
+
 <launch>
 	
 	<!-- Get the params from command line -->
