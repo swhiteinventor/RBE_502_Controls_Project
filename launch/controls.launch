@@ -4,7 +4,7 @@ Launch The Controller for use with Vicon or simulation
 optional args:
 	ctrl:=[ PID | DFL | NLF ]	: what controller to launch (default: PID)
 	sim:=[ false | true ]		: use simulation (default: false)
-	vicon:= [ false | true ] 	: launch vicon node (default: true)
+	vicon:= [ false | true ] 	: launch vicon node (default: false)
 
 Use Cases:
 
@@ -12,8 +12,8 @@ Use Cases:
 
 	default | SIM | VICON | RESULT
 	_________________________________________________________________________
-	  No	|  F  |   F   | Must provide data or launch vcon externally
-	  Yes	|  F  |   T   | Using real vicon data
+	  Yes	|  F  |   F   | Must provide data or launch vicon externally
+	  No	|  F  |   T   | Vicon node is launched too (slower to kill)
 	  No	|  T  |   F   | Sub to data from Gazebo and Pub to Vicon topic
 	  No	|  T  |   T   | Potential Sporadic Results: use at your own risk
 -->
@@ -23,7 +23,7 @@ Use Cases:
 	<!-- Get the params from command line -->
 	<arg name="ctrl" default="PID"/>
 	<arg name="sim" default="false"/>
-	<arg name="vicon" default="true"/>
+	<arg name="vicon" default="false"/>
 
 	<!-- Set the ros parameters that will be retrieved from the python Node -->
 	<param name="cntrllr" value="$(arg ctrl)"/>

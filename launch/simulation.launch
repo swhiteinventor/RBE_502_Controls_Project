@@ -1,10 +1,10 @@
 <!-- 
-	Launch The Simulation Node:
+Launch The Simulation Node:
 
-	The node will subscribe to /gazebo/model_states, format the data and publish it to the vicon topic
+The node will subscribe to /gazebo/model_states, format the data and publish it to the vicon topic
 
-	optional args:
-		out:=[ false | true ]	: print output to screen (default: false)
+optional args:
+	out:=[ false | true ]	: print output to screen (default: false)
 -->
 
 <launch>
@@ -16,6 +16,6 @@
 	<node pkg="controls" type="Simulation.py" name="Simulation" output="screen" if="$(arg out)" />
 
 	<!-- Initialize python simulation node, if OUT to screen disabled -->
-	<node pkg="controls" type="Simulation.py" name="Simulation" output="screen" unless="$(arg out)" />
+	<node pkg="controls" type="Simulation.py" name="Simulation" unless="$(arg out)" />
 
 </launch>

@@ -1,0 +1,21 @@
+<!-- 
+Launch Turtlebot bringup or turtlebot in empty Gazebo world
+
+optional args:
+	sim:=[ false | true ]	: simulate the turtlebot (default: false)
+-->
+
+<launch>
+
+	<!-- Get the params from command line -->
+	<arg name="sim" default="false"/>
+
+	<!-- If not SIM, launch turtlebot bringup node -->
+	<include file="$(find turtlebot_bringup)/launch/minimal.launch" unless="$(arg sim)"/>
+
+	<!-- If SIM, launch gazebo with empty world -->
+	<include file="$(find turtlebot_gazebo)/launch/turtlebot_world.launch" if="$(arg sim)">
+		<arg name="world_file" value="/opt/ros/kinetic/share/turtlebot_gazebo/worlds/empty.world" />
+	</include>
+
+</launch>
