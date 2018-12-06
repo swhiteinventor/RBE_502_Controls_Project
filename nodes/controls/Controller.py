@@ -4,7 +4,7 @@ import roslib; roslib.load_manifest('controls')
 import rospy
 import numpy as np
 import sys
-from math import cos, sin, pi
+from math import cos, sin, pi, atan2
 
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
@@ -99,9 +99,12 @@ class Controller():
 		current_theta = self.current_state.yaw
 
 		# get the signed velocity
-		signed_velocity = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		#signed_velocity = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		v_angle = atan2(state_dot.y,state_dot.x)
 		# get the sign from the velocity
-		sign = -1 if signed_velocity < 0 else 1 if signed_velocity > 0 else 0
+		#sign = -1 if signed_velocity < 0 else 1 if signed_velocity > 0 else 0
+		sign = -1 if v_angle < pi/2 or v_angle > pi/2 else 1
+
 		# apply sign to pythagorian velocity
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
 
