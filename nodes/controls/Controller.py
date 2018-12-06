@@ -2,21 +2,14 @@
 # Import required Python code.
 import roslib; roslib.load_manifest('controls')
 import rospy
-import Queue
 import numpy as np
 import sys
-
-#from rospy.Time import now
-
-from Robot_State import Robot_State
-from std_msgs.msg import Empty, String, Header
-
 from math import cos, sin, pi
 
-from std_msgs.msg import Empty, String
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
-from gazebo_msgs.msg import ModelStates
+
+from Robot_State import Robot_State
 from PID_Controller import PID_controller
 from DFL_Controller import DFL_controller
 from NLF_Controller import NLF_controller
@@ -27,15 +20,15 @@ class Controller():
 		"""initializes the controls node"""
 		rospy.loginfo("Server node started.")
 	
-		self.velocity = .25 #m/s
-		self.angle = 0 #degrees
+		self.velocity = .25 # m/s
+		self.angle = 0 # degrees
 
-		#initializes the robot's position and orientation and time
+		# initializes the robot's position and orientation and time
 		self.past_state = None
 		self.current_state = None
 		self.start = None
 
-		#initializes PID gains
+		# initializes PID gains
 		self.kp_x = 0.7
 		self.ki_x = 0
 		self.kd_x = 0
@@ -43,49 +36,41 @@ class Controller():
 		self.ki_y = 0
 		self.kd_y = 0
 
-		#initializes Dynamic Feedback Linearization gains
+		# initializes Dynamic Feedback Linearization gains
 
 		self.kp_1 = 0.5#1
 		self.kp_2 = 0.5#1
 		self.kd_1 = 0.05#1
 		self.kd_2 = 0.05#1	
 		
-		#initialize Non-Linear Feedback gains
-		self.c1 = 0.5#5
-		self.c2 = 1#10
+		# initialize Non-Linear Feedback gains
+		self.c1 = 0.5 # 5
+		self.c2 = 1 # 10
 
 		self.area_x = 0
 		self.area_y = 0
 
 		self.previous_ = rospy.get_time()
 
-		#options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
+		# options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
-		SIMULATION = rospy.get_param("simulation")
 
 		self.moving_avg_count = 5
 		self.array_iterator = 0
 		self.v_array = [0]*self.moving_avg_count
 		self.omega_array = [0]*self.moving_avg_count
 		
-		#change wand to turtlebot later
+		# change wand to turtlebot later
 		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
-
-		if SIMULATION == True:
-			rospy.loginfo("SIMULATION == True")
-			rospy.Subscriber('/gazebo/model_states', ModelStates, self.on_tf) 
-			self.pub_tf = rospy.Publisher('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, latch=True, queue_size=1)
-
 
 		rospy.loginfo("rospy.spin()")
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
 		"""Given a desired velocity and angle, output velocity and angle will be caluclated"""
-		#rospy.loginfo("traj tracking")
 
-		#calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
+		# calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
 		state_dot = self.calculate_derivatives()
 		
 		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
@@ -138,12 +123,12 @@ class Controller():
 		#error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
 		#error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
 		
-		#runs chosen controller:
-		if self.controller == "DFL": #dynamic feedback linearization
+		# runs chosen controller:
+		if self.controller == "DFL": # dynamic feedback linearization
 			v, omega = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
-		elif self.controller == "NLF": #non-linear feedback
+		elif self.controller == "NLF": # non-linear feedback
 			v, omega = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_omega)
-		elif self.controller == "PID": #PID controller
+		elif self.controller == "PID": # PID controller
 			v, omega = PID_controller(self, error_x, error_y, error_x_dot, error_y_dot, state_dot.t, current_theta)
 		else:
 			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
@@ -154,27 +139,27 @@ class Controller():
 
 
 	def calculate_integral(self, current, last, delta_t):
-		#calculate difference:
+		# calculate difference:
 		delta = current - last
-		#calculate rectangular area:
+		# calculate rectangular area:
 		rect_area = current*delta_t
-		#calculate triangular area:
+		# calculate triangular area:
 		tri_area = delta*delta_t/2
-		#calculate area under the curve:
+		# calculate area under the curve:
 		area = rect_area - tri_area
 		return area
 
 	def calculate_derivatives(self):
 		"""calculates the time derivative of the current stae"""
-		#rospy.loginfo("calc derivs")
+
 		delta_state = self.current_state - self.past_state
-		#calculates derivatives, where time (t) is the time step
+		# calculates derivatives, where time (t) is the time step
 		state_dot = delta_state.divide_by_time()
 		return state_dot
 
 	def calculate_error(self, current, goal):
 		"""calculates the error between a desired input and a given input"""
-		#rospy.loginfo("calc error")
+
 		error = goal - current
 		return error
 
@@ -194,7 +179,9 @@ class Controller():
 		t = Twist()
 		v = max(-2, min(2, v))
 		omega = max(-2, min(2, omega))
+
 		#rospy.loginfo("Current theta: %.4f. Commanded v: %.4f, omega: %.4f" % (self.current_state.yaw*180/pi, v, theta*180/pi))
+		
 		t.linear.x = v
 		t.linear.y = 0
 		t.linear.z = 0
@@ -204,34 +191,32 @@ class Controller():
 		self.pub.publish(t)
 
 
-	def on_data(self, data):
-		#rospy.loginfo("on data")
-		
+	def on_data(self, data):	
 		"""Callback function that handle subscriber data and updates self."""
-		#rospy.loginfo(rospy.get_name() + " I got data %s", data)
-		#set desired data rate:
-		desired_ = .2 #sec
+
+		# set desired data rate:
+		desired_ = .2 # sec
 		if ((rospy.get_time() - self.previous_) > desired_):
 			self.previous_ = rospy.get_time()	
 		else:
 			return None
-		#sets the position data	
+		# sets the position data	
 		x = data.transform.translation.x
 		y = data.transform.translation.y
 		z = data.transform.translation.z
 		
-		#converts the quaternion to euler angles
+		# converts the quaternion to euler angles
 		euler = self.quaternion_to_euler(data.transform.rotation)
 		
-		#sets the orientation data	
+		# sets the orientation data	
 		roll = euler[0]
 		pitch = euler[1]
 		yaw = euler[2]
 		
-		#grabs the current time stamp
+		# grabs the current time stamp
 		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
 
-		#set states if new state time is unique
+		# set states if new state time is unique
 		if self.current_state != None:
 			if current_time == self.current_state.t:
 				pass
@@ -239,26 +224,26 @@ class Controller():
 				self.past_state = self.current_state
 				self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
 
-				#runs only once and grabs the beginning state
+				# runs only once and grabs the beginning state
 				if self.start == None:
 					self.start = self.current_state
 
-				#calls the trajectory tracker
+				# calls the trajectory tracker
 				if self.past_state != None:
 					
-					#set velocity in m/s:
+					# set velocity in m/s:
 					velocity = self.velocity
 					
-					#set desired theta in degrees:
+					# set desired theta in degrees:
 					angle = self.angle
 
-					#calculates controller:
+					# calculates controller:
 					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
 					
-					#averages recent commands for smooth operation
+					# averages recent commands for smooth operation
 					#[v_average, omega_average] = self.moving_average(v,omega)
 
-					#sends commands to robot
+					# sends commands to robot
 					self.send_twist_message(v, omega)
 		else:
 			self.past_state = self.current_state
@@ -266,23 +251,9 @@ class Controller():
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
-		#rospy.loginfo("quat to euler")
 		#type(pose) = geometry_msgs.msg.Pose
 		euler = tf.transformations.euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 		return euler
-
-	def on_tf(self, data):
-
-		pose = data.pose[1]
-
-		h = Header()
-		h.stamp = rospy.Time.now()
-
-		t = TransformStamped()
-		t.transform.translation = pose.position
-		t.transform.rotation = pose.orientation
-		t.header = h
-		self.pub_tf.publish(t)
 
 # Main function.
 if __name__ == '__main__':

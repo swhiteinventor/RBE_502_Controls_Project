@@ -1,0 +1,21 @@
+<!-- 
+	Launch The Simulation Node:
+
+	The node will subscribe to /gazebo/model_states, format the data and publish it to the vicon topic
+
+	optional args:
+		out:=[ false | true ]	: print output to screen (default: false)
+-->
+
+<launch>
+
+	<!-- Get the params from command line -->
+	<arg name="out" default="false"/>
+
+	<!-- Initialize python simulation node, if OUT to screen enabled -->
+	<node pkg="controls" type="Simulation.py" name="Simulation" output="screen" if="$(arg out)" />
+
+	<!-- Initialize python simulation node, if OUT to screen disabled -->
+	<node pkg="controls" type="Simulation.py" name="Simulation" output="screen" unless="$(arg out)" />
+
+</launch>

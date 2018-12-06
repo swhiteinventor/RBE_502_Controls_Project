@@ -1,0 +1,40 @@
+<!-- 
+Launch The Controller for use with Vicon or simulation
+
+optional args:
+	ctrl:=[ PID | DFL | NLF ]	: what controller to launch (default: PID)
+	sim:=[ false | true ]		: use simulation (default: false)
+	vicon:= [ false | true ] 	: launch vicon node (default: true)
+
+Use Cases:
+
+	CTRL: select between the controllers
+
+	default | SIM | VICON | RESULT
+	_________________________________________________________________________
+	  No	|  F  |   F   | Must provide data or launch vcon externally
+	  Yes	|  F  |   T   | Using real vicon data
+	  No	|  T  |   F   | Sub to data from Gazebo and Pub to Vicon topic
+	  No	|  T  |   T   | Potential Sporadic Results: use at your own risk
+-->
+
+<launch>
+
+	<!-- Get the params from command line -->
+	<arg name="ctrl" default="PID"/>
+	<arg name="sim" default="false"/>
+	<arg name="vicon" default="true"/>
+
+	<!-- Set the ros parameters that will be retrieved from the python Node -->
+	<param name="cntrllr" value="$(arg ctrl)"/>
+
+	<!-- If VICON, initialize vicon node -->
+	<include file="$(find controls)/launch/vicon.launch" if="$(arg vicon)"/>
+
+	<!-- If SIM, initialize simulation sub/pub node -->
+	<include file="$(find controls)/launch/simulation.launch" if="$(arg sim)"/>
+
+	<!-- Initialize python controller node, output to screen -->
+	<node pkg="controls" type="Controller.py" name="Controller" output="screen" />
+
+</launch>
