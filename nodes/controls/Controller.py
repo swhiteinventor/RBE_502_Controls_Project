@@ -9,7 +9,7 @@ from math import cos, sin, pi
 import tf.transformations
 from geometry_msgs.msg import Twist, TransformStamped
 
-from Robot_State import Robot_State
+from Robot_State import Robot_State, Data
 from PID_Controller import PID_controller
 from DFL_Controller import DFL_controller
 from NLF_Controller import NLF_controller
@@ -20,32 +20,26 @@ class Controller():
 		"""initializes the controls node"""
 		rospy.loginfo("Server node started.")
 	
+		# Desired v,degrees
 		self.velocity = .25 # m/s
 		self.angle = 0 # degrees
+
+		# Controller Gains
+
+		# initializes PID gains
+		self.kPID_x = (.7,	0,	0)
+		self.kPID_y = (0,	0,	0)
+		# initializes Dynamic Feedback Linearization gains
+		self.kPD_1 = (0.5,	0.05)
+		self.kPD_2 = (0.5,	0.05)
+		# initialize Non-Linear Feedback gains
+		self.c = (0.5,	1)
+
 
 		# initializes the robot's position and orientation and time
 		self.past_state = None
 		self.current_state = None
 		self.start = None
-
-		# initializes PID gains
-		self.kp_x = 0.7
-		self.ki_x = 0
-		self.kd_x = 0
-		self.kp_y = 1
-		self.ki_y = 0
-		self.kd_y = 0
-
-		# initializes Dynamic Feedback Linearization gains
-
-		self.kp_1 = 0.5#1
-		self.kp_2 = 0.5#1
-		self.kd_1 = 0.05#1
-		self.kd_2 = 0.05#1	
-		
-		# initialize Non-Linear Feedback gains
-		self.c1 = 0.5 # 5
-		self.c2 = 1 # 10
 
 		self.area_x = 0
 		self.area_y = 0
@@ -54,6 +48,17 @@ class Controller():
 
 		# options include: "PID" (proportional integral derivative), "DFL" (dynamic feedback linearization), "NLF" (non-linear feedback)
 		self.controller = rospy.get_param("cntrllr")
+
+		# Determine the controller:
+		if self.controller == "DFL": # dynamic feedback linearization
+			self.controller = DFL_controller
+		elif self.controller == "NLF": # non-linear feedback
+			self.controller = NLF_controller
+		elif self.controller == "PID": # PID controller
+			self.controller = PID_controller
+		else:
+			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
+			sys.exit(0)
 
 		self.moving_avg_count = 5
 		self.array_iterator = 0
@@ -73,40 +78,31 @@ class Controller():
 		# calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
 		state_dot = self.calculate_derivatives()
 		
-		#based on the desired velocity and theta, calculate the desired x,y positions/velocities/accelerations
-		#desired_x = self.past_state.x + cos(self.past_state.yaw)*desired_v*state_dot.t
-		#desired_y = self.past_state.y + sin(self.past_state.yaw)*desired_v*state_dot.t
-		
-		#test to see if we can track a line
+		# desired x,y to track a line (position)
 		desired_x = self.start.x + cos(desired_theta)*desired_v*(self.current_state.t-self.start.t)
 		desired_y = self.start.y + sin(desired_theta)*desired_v*(self.current_state.t-self.start.t)
-
+		# desired x,y dot (velocity)
 		desired_x_dot = desired_v*cos(desired_theta)
 		desired_y_dot = desired_v*sin(desired_theta)
+		# desired x,y dot dot (acceleration)
 		desired_x_dot_dot = 0
 		desired_y_dot_dot = 0
 		
-		# calculate the x,y position and velocity errors
+		# calculate the x,y position error
 		error_x = self.calculate_error(self.current_state.x,desired_x)
 		error_y = self.calculate_error(self.current_state.y,desired_y)
+		# calculate the x,y velocity error
 		error_x_dot = self.calculate_error(state_dot.x, desired_x_dot)
 		error_y_dot = self.calculate_error(state_dot.y, desired_y_dot)
 		
 		#calculate the current theta and velocity
 		current_theta = self.current_state.yaw
-		current_v = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
 
-		#current_v_signed = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
-		#current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5
-		#current_v = current_v_signed/abs(current_v_signed)*current_v
-
-		#print state_dot
-		#print "Current Theta: ", current_theta
-		#print "Current Velocity: ", current_v
-
-		sign = -1 if current_v < 0 else 1 if current_v > 0 else 0
-		#current_v = state_dot.x
-			
+		# get the signed velocity
+		signed_velocity = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
+		# get the sign from the velocity
+		sign = -1 if signed_velocity < 0 else 1 if signed_velocity > 0 else 0
+		# apply sign to pythagorian velocity
 		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
 
 		#calculate integrals for PID
@@ -120,19 +116,26 @@ class Controller():
 		desired_v_dot = 0
 		desired_theta_dot = 0
 		desired_omega = desired_theta_dot
-		#error_v_dot = self.calculate_error(current_v_dot, desired_v_dot)
-		#error_theta_dot = self.calculate_error(current_theta_dot, desired_theta_dot)
 		
+		# Create a Data Wrapper
+		data = Data()
+		data.current_theta = current_theta
+		data.error_x = error_x
+		data.error_y = error_y
+		data.error_theta = error_theta
+		data.error_v = error_v
+		data.error_x_dot = error_x_dot
+		data.error_y_dot = error_y_dot
+		data.desired_v = desired_v
+		data.desired_omega = desired_omega
+		data.desired_x_dot_dot = desired_x_dot_dot
+		data.desired_y_dot_dot = desired_y_dot_dot
+		data.time_step = state_dot.t
+		data.area_x = self.area_x
+		data.area_y = self.area_y
+
 		# runs chosen controller:
-		if self.controller == "DFL": # dynamic feedback linearization
-			v, omega = DFL_controller(self, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta)
-		elif self.controller == "NLF": # non-linear feedback
-			v, omega = NLF_controller(self, error_x, error_y, error_theta, desired_v, desired_omega)
-		elif self.controller == "PID": # PID controller
-			v, omega = PID_controller(self, error_x, error_y, error_x_dot, error_y_dot, state_dot.t, current_theta)
-		else:
-			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
-			sys.exit(0)
+		v, omega = self.controller(self, data)
 
 		print "t=%.4f, current_v=%.4f m/s, current_theta=%.2f deg, error_v=%.2f, error_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.t, current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, omega*180/pi)
 		return (v, omega)
@@ -179,8 +182,6 @@ class Controller():
 		t = Twist()
 		v = max(-2, min(2, v))
 		omega = max(-2, min(2, omega))
-
-		#rospy.loginfo("Current theta: %.4f. Commanded v: %.4f, omega: %.4f" % (self.current_state.yaw*180/pi, v, theta*180/pi))
 		
 		t.linear.x = v
 		t.linear.y = 0

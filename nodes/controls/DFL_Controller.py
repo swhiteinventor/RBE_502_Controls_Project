@@ -1,14 +1,13 @@
 # DFL_Controller
-import rospy
-
 from math import cos, sin, pi
-def DFL_controller(controller, error_x, error_y, error_x_dot, error_y_dot, desired_x_dot_dot, desired_y_dot_dot, desired_v, current_theta, error_v, error_theta):
+from Robot_State import Robot_State, Data
 
-	u1 = desired_x_dot_dot + controller.kp_1*error_x + controller.kd_1*error_x_dot
-	u2 = desired_y_dot_dot + controller.kp_2*error_y + controller.kd_2*error_y_dot
+def DFL_controller(controller, data):
+
+	u1 = data.desired_x_dot_dot + controller.kPD_1[0]*data.error_x + controller.kPD_1[1]*data.error_x_dot
+	u2 = data.desired_y_dot_dot + controller.kPD_2[0]*data.error_y + controller.kPD_2[1]*data.error_y_dot
 	
-	v = desired_v
-	omega = (u2*cos(current_theta) - u1*sin(current_theta))/desired_v
-	#print("u1=%.4f, u2=%.4f, cos()=%.4f, sin()=%.4f, theta = %.4f, e_v=%.4f, e_theta=%.4f" % (u1, u2, cos(current_theta), sin(current_theta), omega, error_v, error_theta*180/pi))
+	v = data.desired_v
+	omega = (u2*cos(data.current_theta) - u1*sin(data.current_theta))/data.desired_v
 
 	return v, omega

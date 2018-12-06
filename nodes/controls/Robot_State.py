@@ -7,28 +7,6 @@ class Robot_State():
 		self.pitch = pitch
 		self.yaw = yaw
 		self.t = t
-	
-	def set_position_rpy_t(self, x=None, y=None, z=None, roll=None, pitch=None, yaw=None, t=None):
-		self.set_position(x,y,z)
-		self.set_rpy(roll,pitch,yaw)
-		if t!=None:
-			self.t = t
-
-	def set_position(self, x=None, y=None, z=None):
-		if x!=None:
-			self.x = x
-		if y!=None:
-			self.y = y
-		if z!=None:
-			self.z = z
-
-	def set_rpy(self, roll=None, pitch=None, yaw=None):
-		if roll!=None:
-			self.roll = roll
-		if pitch!=None:
-			self.pitch = pitch
-		if yaw!=None:
-			self.yaw = yaw
 			
 	def divide_by_time(self):
 		a = self
@@ -62,3 +40,7 @@ class Robot_State():
 		a = self
 
 		return "Robot State:\n  x: %.4f y: %.4f z: %.4f\n  roll: %.4f pitch: %.4f yaw: %.4f\n  t: %.4f" % (a.x, a.y, a.z, a.roll, a.pitch, a.yaw, a.t)
+
+class Data():
+	def __init__(self):
+		return None

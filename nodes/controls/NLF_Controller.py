@@ -1,11 +1,12 @@
 # NLF_Controller
 from math import sin, cos, pi
+from Robot_State import Robot_State, Data
 
-def NLF_controller(controller, error_x, error_y, error_theta, desired_v, desired_omega):
+def NLF_controller(controller, data):
 	
-	zeta = 2*controller.c1*((desired_omega)**2 + controller.c2*(desired_v)**2)**0.5
-	v = zeta*error_x + desired_v*cos(error_theta)
-	omega = desired_omega + zeta*desired_v*sin(error_theta)*error_y/error_theta + controller.c2*error_theta
+	zeta = 2*controller.c[0]*((data.desired_omega)**2 + controller.c[1]*(data.desired_v)**2)**0.5
+	v = zeta*data.error_x + data.desired_v*cos(data.error_theta)
+	omega = data.desired_omega + zeta*data.desired_v*sin(data.error_theta)*data.error_y/data.error_theta + controller.c[1]*data.error_theta
 
 	return v, omega
 	
