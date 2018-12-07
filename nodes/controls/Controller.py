@@ -13,6 +13,7 @@ from Robot_State import Robot_State, Data
 from PID_Controller import PID_controller
 from DFL_Controller import DFL_controller
 from NLF_Controller import NLF_controller
+from MPC_Controller import MPC_controller
 
 class Controller():
 
@@ -27,8 +28,8 @@ class Controller():
 		# Controller Gains
 
 		# initializes PID gains
-		self.kPID_x = (.7,	0,	0)
-		self.kPID_y = (0,	0,	0)
+		self.kPID_x = (1,	.001,	.01)
+		self.kPID_y = (1,	.001,	.01)
 		# initializes Dynamic Feedback Linearization gains
 		self.kPD_1 = (0.5,	0.05)
 		self.kPD_2 = (0.5,	0.05)
@@ -56,6 +57,8 @@ class Controller():
 			self.controller = NLF_controller
 		elif self.controller == "PID": # PID controller
 			self.controller = PID_controller
+		elif self.controller == "MPC": # MPC controller
+			self.controller = MPC_controller
 		else:
 			rospy.logerror("Controller Type Unknown. Select DFL, NLF, or PID.")
 			sys.exit(0)
@@ -119,6 +122,10 @@ class Controller():
 		
 		# Create a Data Wrapper
 		data = Data()
+		data.current_state_x = self.current_state.x
+		data.current_state_y = self.current_state.y
+		data.desired_x = desired_x
+		data.desired_y = desired_y
 		data.current_theta = current_theta
 		data.error_x = error_x
 		data.error_y = error_y
@@ -133,6 +140,7 @@ class Controller():
 		data.time_step = state_dot.t
 		data.area_x = self.area_x
 		data.area_y = self.area_y
+		data.current_theta = current_theta
 
 		# runs chosen controller:
 		v, omega = self.controller(self, data)
