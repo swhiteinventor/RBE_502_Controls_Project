@@ -23,7 +23,7 @@ class Controller():
 	
 		# Desired v,degrees
 		self.velocity = .25 # m/s
-		self.angle = 0 # degrees
+		self.angle = -90 # degrees
 
 		# Controller Gains
 
@@ -31,8 +31,8 @@ class Controller():
 		self.kPID_x = (1,	.001,	.01)
 		self.kPID_y = (1,	.001,	.01)
 		# initializes Dynamic Feedback Linearization gains
-		self.kPD_1 = (0.5,	0.05)
-		self.kPD_2 = (0.5,	0.05)
+		self.kPD_1 = (0.25,	0.05)
+		self.kPD_2 = (0.25,	0.05)
 		# initialize Non-Linear Feedback gains
 		self.c = (0.5,	1)
 
@@ -109,7 +109,7 @@ class Controller():
 		sign = -1 if v_angle < pi/2.0 or v_angle > pi/2.0 else 1
 
 		# apply sign to pythagorian velocity
-		current_v = abs(((state_dot.x)**2+(state_dot.y)**2)**0.5)
+		current_v = abs(((state_dot.x)**2+(state_dot.y)**2)**0.5)*-sign
 
 		#calculate integrals for PID
 		self.area_x += self.calculate_integral(self.current_state.x, self.past_state.x, state_dot.t)
@@ -149,7 +149,7 @@ class Controller():
 		# runs chosen controller:
 		v, omega = self.controller(self, data)
 
-		print "t=%.4f, current_v=%.4f m/s, current_theta=%.2f deg, error_v=%.2f, error_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.t, current_v, current_theta*180/pi, error_v, error_theta*180/pi, v, omega*180/pi)
+		print "c_x=%.2f m, c_y=%.2f, c_v=%.4f m/s, c_theta=%.2f deg,e_x=%.2f, e_y=%.2f, e_v=%.2f, e_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.x, self.current_state.y, current_v, current_theta*180/pi,error_x, error_y,  error_v, error_theta*180/pi, v, omega*180/pi)
 		return (v, omega)
 
 
@@ -192,8 +192,8 @@ class Controller():
 	def send_twist_message(self, v, omega):
 		"""takes in the velocity and theta"""
 		t = Twist()
-		v = max(-2, min(2, v))
-		omega = max(-2, min(2, omega))
+		v = max(-10, min(10, v))
+		omega = max(-10, min(10, omega))
 		
 		t.linear.x = v
 		t.linear.y = 0
@@ -224,7 +224,7 @@ class Controller():
 		# sets the orientation data	
 		roll = euler[0]
 		pitch = euler[1]
-		yaw = euler[2]
+		yaw = euler[2] - .5*pi
 		
 		# grabs the current time stamp
 		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
