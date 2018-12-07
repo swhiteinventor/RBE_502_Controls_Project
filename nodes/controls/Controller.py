@@ -106,10 +106,10 @@ class Controller():
 		v_angle = atan2(state_dot.y,state_dot.x)
 		# get the sign from the velocity
 		#sign = -1 if signed_velocity < 0 else 1 if signed_velocity > 0 else 0
-		sign = -1 if v_angle < pi/2 or v_angle > pi/2 else 1
+		sign = -1 if v_angle < pi/2.0 or v_angle > pi/2.0 else 1
 
 		# apply sign to pythagorian velocity
-		current_v = ((state_dot.x)**2+(state_dot.y)**2)**0.5 * sign
+		current_v = abs(((state_dot.x)**2+(state_dot.y)**2)**0.5)
 
 		#calculate integrals for PID
 		self.area_x += self.calculate_integral(self.current_state.x, self.past_state.x, state_dot.t)
@@ -144,7 +144,8 @@ class Controller():
 		data.area_x = self.area_x
 		data.area_y = self.area_y
 		data.current_theta = current_theta
-
+		data.desired_x_dot = desired_x_dot
+		data.desired_y_dot = desired_y_dot
 		# runs chosen controller:
 		v, omega = self.controller(self, data)
 
@@ -158,7 +159,7 @@ class Controller():
 		# calculate rectangular area:
 		rect_area = current*delta_t
 		# calculate triangular area:
-		tri_area = delta*delta_t/2
+		tri_area = delta*delta_t/2.0
 		# calculate area under the curve:
 		area = rect_area - tri_area
 		return area
