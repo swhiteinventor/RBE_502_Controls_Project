@@ -31,12 +31,15 @@ To easily demonstrate the ability on simulation run the following commands in tw
 
 ```
 roslaunch controls turtlebot.launch sim:=true
-roslaunch controls controller.launch sim=:true
+roslaunch controls controls.launch sim=:true
 ```
 
 The 1st command will launch gazebo with the turtlbot in an empty world.
 
 The second command will launch the controller while retrieving the fake vicon data from gazebo.
+
+Note: the PID controller will run when no controller is specified. See below for how to test other controllers.
+
 
 ### Actual:
 In three seperate terminals run the following commands, replacing <VICON IP> with your vicon IP address:
@@ -44,14 +47,15 @@ In three seperate terminals run the following commands, replacing <VICON IP> wit
 ```
 roslaunch controls turtlebot.launch
 roslaunch controls vicon.launch ip:=<VICON IP>
-roslaunch controls controller.launch
+roslaunch controls controls.launch
 ```
 
-### Testing other controllers:
-[controller.launch](nodes/controls/controller.launch) supports multiple arguments so please see that file for more information. But to test other controllers pre-implemented add one the following to the launch command:
+### Testing other controllers (in simulation or or actual):
+[controller.launch](nodes/controls/controls.launch) supports multiple arguments so please see that file for more information. But to test other controllers pre-implemented add one the following to the launch command:
 ```
 ctrl:=DFL
 ctrl:=NLF
+ctrl:=MPC
 ```
 Note: the PID controller will run when none is specified.
 

@@ -1,4 +1,8 @@
 # Linear MPC controller
+
+#This controller was developed by Boyu Du, Hanshen Yu, and Siyu Li in 2018.
+
+
 from cvxopt import matrix
 from cvxopt.solvers import qp
 # from quadprog import solve_qp as qp # can substitute cvxopt
