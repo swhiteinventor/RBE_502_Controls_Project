@@ -21,9 +21,11 @@ class Controller():
 		"""initializes the controls node"""
 		rospy.loginfo("Server node started.")
 	
+		self.velocity = rospy.get_param("veloc_d")
+		self.angle = rospy.get_param("theta_d")
 		# Desired v,degrees
-		self.velocity = .25 # m/s
-		self.angle = 0 # degrees
+		#self.velocity = .25 # m/s
+		#self.angle = 0 # degrees
 
 		# Controller Gains
 

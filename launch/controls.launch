@@ -25,8 +25,13 @@ Use Cases:
 	<arg name="sim" default="false"/>
 	<arg name="vicon" default="false"/>
 
+	<arg name="veloc" default="0.25"/>
+	<arg name="theta" default="0"/>
+
 	<!-- Set the ros parameters that will be retrieved from the python Node -->
 	<param name="cntrllr" value="$(arg ctrl)"/>
+	<param name="veloc_d" value="$(arg veloc)"/>
+	<param name="theta_d" value="$(arg theta)"/>
 
 	<!-- If VICON, initialize vicon node -->
 	<include file="$(find controls)/launch/vicon.launch" if="$(arg vicon)"/>
