@@ -23,7 +23,7 @@ class Controller():
 	
 		# Desired v,degrees
 		self.velocity = .25 # m/s
-		self.angle = -90 # degrees
+		self.angle = 0 # degrees
 
 		# Controller Gains
 
@@ -109,7 +109,7 @@ class Controller():
 		sign = -1 if v_angle < pi/2.0 or v_angle > pi/2.0 else 1
 
 		# apply sign to pythagorian velocity
-		current_v = abs(((state_dot.x)**2+(state_dot.y)**2)**0.5)*-sign
+		current_v = abs(((state_dot.x)**2+(state_dot.y)**2)**0.5)*sign
 
 		#calculate integrals for PID
 		self.area_x += self.calculate_integral(self.current_state.x, self.past_state.x, state_dot.t)
@@ -224,7 +224,7 @@ class Controller():
 		# sets the orientation data	
 		roll = euler[0]
 		pitch = euler[1]
-		yaw = euler[2] - .5*pi
+		yaw = euler[2]		
 		
 		# grabs the current time stamp
 		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
