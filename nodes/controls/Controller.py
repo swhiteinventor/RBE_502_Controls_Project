@@ -229,37 +229,40 @@ class Controller():
 		current_time = data.header.stamp.secs + data.header.stamp.nsecs/1E9
 
 		# set states if new state time is unique
-		if self.current_state != None:
-			if current_time == self.current_state.t:
-				pass
-			else:
-				self.past_state = self.current_state
-				self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
-
-				# runs only once and grabs the beginning state
-				if self.start == None:
-					self.start = self.current_state
-
-				# calls the trajectory tracker
-				if self.past_state != None:
-					
-					# set velocity in m/s:
-					velocity = self.velocity
-					
-					# set desired theta in degrees:
-					angle = self.angle
-
-					# calculates controller:
-					v, omega = self.trajectory_tracking(velocity, angle*pi/180)
-					
-					# averages recent commands for smooth operation
-					#[v_average, omega_average] = self.moving_average(v,omega)
-
-					# sends commands to robot
-					self.send_twist_message(v, omega)
-		else:
+		if self.current_state == None:
 			self.past_state = self.current_state
 			self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
+			return None
+
+
+		if current_time == self.current_state.t:
+			return None
+
+		self.past_state = self.current_state
+		self.current_state = Robot_State(x,y,z,roll,pitch,yaw,current_time)
+
+		# runs only once and grabs the beginning state
+		if self.start == None:
+			self.start = self.current_state
+
+		# calls the trajectory tracker
+		if self.past_state == None:
+			return None
+		
+		# sets velocity in m/s:
+		velocity = self.velocity
+		
+		# sets desired theta in radians:
+		angle = self.angle*pi/180.0
+
+		# calculates controller:
+		v, omega = self.trajectory_tracking(velocity, angle)
+		
+		# averages recent commands for smooth operation
+		#[v_average, omega_average] = self.moving_average(v,omega)
+
+		# sends commands to robot
+		self.send_twist_message(v, omega)
 
 	def quaternion_to_euler(self, quaternion):
 		"""converts a quaternion to euler angles"""
