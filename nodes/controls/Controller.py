@@ -30,13 +30,13 @@ class Controller():
 		# Controller Gains
 
 		# initializes PID gains
-		self.kPID_x = (1,	.001,	.01)
-		self.kPID_y = (1,	.001,	.01)
+		self.kPID_x = (0.75,	0.00001,	0.0005)
+		self.kPID_y = (0.75,	0.00001,	0.0005)	
 		# initializes Dynamic Feedback Linearization gains
-		self.kPD_1 = (0.25,	0.05)
-		self.kPD_2 = (0.25,	0.05)
+		self.kPD_1 = (3,	0.05)
+		self.kPD_2 = (3,	0.05)
 		# initialize Non-Linear Feedback gains
-		self.c = (0.5,	1)
+		self.c = (4, 7)#(less chatter = smaller, faster convergence = bigger)	
 
 
 		# initializes the robot's position and orientation and time
@@ -210,7 +210,7 @@ class Controller():
 		"""Callback function that handle subscriber data and updates self."""
 
 		# set desired data rate:
-		desired_ = .2 # sec
+		desired_ = .001 # sec
 		if ((rospy.get_time() - self.previous_) > desired_):
 			self.previous_ = rospy.get_time()	
 		else:

@@ -20,9 +20,9 @@ def MPC_controller(controller, data):
 
     # def const params
     N = 5 #window length
-    Q = [1,1,0.5]
-    R = [0.1,0.1]
-    dt = 0.1 #time step
+    Q = [01,1,0.5]
+    R = [0.1,0.01]
+    dt = data.time_step #time step
     x = current_state_x
     y = current_state_y
     t = current_state_yaw
@@ -76,12 +76,12 @@ def MPC_controller(controller, data):
     # q_op = qp(qp_G, qp_a, None, None, 0) # if use quadprog
     
     # output
-    x_dot = (v_r[0] + q_op[0]) * np.cos(t_r[0])
-    y_dot = (v_r[0] + q_op[0]) * np.sin(t_r[0])
+    x_dot = (v_r[0] + q_op[0]) * np.cos(t_r[0])*0.1
+    y_dot = (v_r[0] + q_op[0]) * np.sin(t_r[0])*0.1
     theta_dot = dt_r[0] + q_op[1]
     v = np.sqrt(x_dot**2 + y_dot**2)
-    print(v)
-    print(theta_dot)
+    #print(v)
+    #print(theta_dot)
     
 
     return v, theta_dot
