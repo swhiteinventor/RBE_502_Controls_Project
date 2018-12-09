@@ -6,6 +6,7 @@ from cvxopt import matrix
 from cvxopt.solvers import qp
 # from quadprog import solve_qp as qp # can substitute cvxopt
 import numpy as np
+from math import cos, sin
 
 def MPC_controller(controller, data):
     
@@ -18,10 +19,11 @@ def MPC_controller(controller, data):
     current_state_yaw = data.current_theta
 
     # def const params
-    N = 5 #window length
-    Q = [1,1,1]
-    R = [1,.1]
+    N = 5 #window length, larger = converge slower, less overshoot
+    Q = [1, 1, 0.5] #gain for x, y, theta
+    R = [0.1, 0.1] #dampening
     dt = data.time_step #time step
+    #dt = 0.01
     x = current_state_x
     y = current_state_y
     t = current_state_yaw
@@ -83,7 +85,8 @@ def MPC_controller(controller, data):
     x_dot = (v_r[0] + q_op[0]) * np.cos(t_r[0])
     y_dot = (v_r[0] + q_op[0]) * np.sin(t_r[0])
     theta_dot = dt_r[0] + q_op[1]
-    v = np.sqrt(x_dot**2 + y_dot**2)
+    #v = np.sqrt(x_dot**2 + y_dot**2)
+    v = x_dot*cos(t) + y_dot*sin(t)
     #print(v)
     #print(theta_dot)
     
