@@ -47,10 +47,10 @@ def MPC_controller(controller, data):
     for i in range (0,N-1):
         x_r[i] = desired_x + dt * desired_x_dot * i
         y_r[i] = desired_y + dt * desired_y_dot * i
-        t_r[i] = np.arctan2(y_r[i], x_r[i])
         dx_r[i] = desired_x_dot
         dy_r[i] = desired_y_dot
-        dt_r[i] = np.arctan2(dy_r[i], dx_r[i])
+        t_r[i] = np.arctan2(dy_r[i],dx_r[i])
+        dt_r[i] = 0
         v_r[i] = np.sqrt(dx_r[i]**2 + dy_r[i]**2)
 
     # update A and B mat for window
@@ -87,8 +87,8 @@ def MPC_controller(controller, data):
     theta_dot = dt_r[0] + q_op[1]
     #v = np.sqrt(x_dot**2 + y_dot**2)
     v = x_dot*cos(t) + y_dot*sin(t)
-    #print(v)
-    #print(theta_dot)
+    #print(str(e_hat))
+    #print('%10.4f'%x_r[0]+'%10.4f'%y_r[0]+'%10.4f'%t_r[0]+'%10.4f'%x_dot+'%10.4f'%y_dot+'%10.4f'%theta_dot)
     
 
     return v, theta_dot

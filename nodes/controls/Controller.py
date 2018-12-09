@@ -129,6 +129,8 @@ class Controller():
 		
 		# Create a Data Wrapper
 		data = Data()
+		data.start_x = self.start.x
+		data.start_y = self.start.y
 		data.current_state_x = self.current_state.x
 		data.current_state_y = self.current_state.y
 		data.desired_x = desired_x
