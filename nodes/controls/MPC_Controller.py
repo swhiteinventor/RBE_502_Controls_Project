@@ -1,8 +1,7 @@
 # Linear MPC controller
-
+#
 #This controller was developed by Boyu Du, Hanshen Yu, and Siyu Li in 2018.
-
-
+#
 from cvxopt import matrix
 from cvxopt.solvers import qp
 # from quadprog import solve_qp as qp # can substitute cvxopt
@@ -20,17 +19,22 @@ def MPC_controller(controller, data):
 
     # def const params
     N = 5 #window length
-    Q = [1,1,0.5]
-    R = [0.1,0.1]
-    dt = 0.1 #time step
+    Q = [01,1,0.5]
+    R = [0.1,0.01]
+    dt = data.time_step #time step
     x = current_state_x
     y = current_state_y
     t = current_state_yaw
 
     # create empty params
-    x_r = y_r = t_r = v_r = np.zeros(N) # desired x, y, theta, v
-    dx_r = dy_r = dt_r = np.zeros(N) # desired x_dot, y_dot, theta_dot
-    A = np.zeros((3,3,N))
+    x_r =np.zeros(N)# desired x, y, theta, v
+    y_r =np.zeros(N)
+    t_r =np.zeros(N)
+    v_r =np.zeros(N)
+    dx_r =np.zeros(N)# desired x_dot, y_dot, theta_dot
+    dy_r =np.zeros(N)
+    dt_r =np.zeros(N)
+    A = np.zeros((3,3,N))# controller params
     B = np.zeros((3,2,N))
 
     # calc controller consts
@@ -66,7 +70,7 @@ def MPC_controller(controller, data):
             for m in range(i+1,j):
                 B_hat[j*3:j*3+3, i*2:i*2+2] = np.dot(A[:,:,m], B_hat[j*3:j*3+3, i*2:i*2+2])
 
-    # optimization 
+    # optimization
     e_hat = [[x - x_r[0],],[y - y_r[0]],[t - t_r[0]]]
     BQ_hat = np.dot(np.transpose(B_hat), Q_hat)
     qp_G = matrix(2*(np.dot(BQ_hat, B_hat) + R_hat))
@@ -80,8 +84,8 @@ def MPC_controller(controller, data):
     y_dot = (v_r[0] + q_op[0]) * np.sin(t_r[0])
     theta_dot = dt_r[0] + q_op[1]
     v = np.sqrt(x_dot**2 + y_dot**2)
-    print(v)
-    print(theta_dot)
+    #print(v)
+    #print(theta_dot)
     
 
     return v, theta_dot
