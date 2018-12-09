@@ -30,8 +30,10 @@ class Controller():
 		# Controller Gains
 
 		# initializes PID gains
-		self.kPID_x = (0.75,	0.00001,	0.0005)
-		self.kPID_y = (0.75,	0.00001,	0.0005)	
+		self.kPID_x = (1,	 0.0001, 	0.0005)
+		self.kPID_y = (1,	 0.0001, 	0.0005)	
+		self.PID_velocity_scale = 1
+		self.PID_omega_scale = 1
 		# initializes Dynamic Feedback Linearization gains
 		self.kPD_1 = (3,	0.05)
 		self.kPD_2 = (3,	0.05)
@@ -70,7 +72,7 @@ class Controller():
 		self.v_array = [0]*self.moving_avg_count
 		self.omega_array = [0]*self.moving_avg_count
 		
-		# change wand to turtlebot later
+		# Subscribe and publish
 		rospy.Subscriber('/vicon/turtlebot_traj_track/turtlebot_traj_track', TransformStamped, self.on_data) 
 		self.pub = rospy.Publisher('/mobile_base/commands/velocity', Twist, latch=True, queue_size=1)
 
