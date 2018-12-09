@@ -4,217 +4,296 @@ import rosbag
 import matplotlib.pyplot as plt
 import sys
 import numpy as np
+import tf.transformations
+from math import pi
+import glob, os
+from geometry_msgs.msg import TwistStamped
 
-print 'Number of arguments:', len(sys.argv), 'arguments.'
-print 'Argument List:', str(sys.argv)
+class Post_Data():
+	def __init__(self):
+		return None
 
-if (len(sys.argv) == 2) and (sys.argv[1] == '--help'):
-   print "Usage: plot_bag file_name <\"use_ground_truth\"> <robot namespace> <start_time> <end_time> "
-   print "  plot_bag 2015-01-15-10-13-41.bag  0 10.4 20.5"
-   print "  optional arguments must be in order "
-   print "    set start time to starting time in seconds (default=0)"
-   print "    set end time in seconds (default=final time in bag)"
+def processor(bag_file='test.bag'):
 
+	start_time = 0
+	end_time   = 9E9
 
-file_name = 'log.bag'
-if (len(sys.argv) > 1):
-	file_name = sys.argv[1]
+	#print "Read bag file ..."
+	bag = rosbag.Bag(bag_file, 'r')
 
-start_time = 0
-end_time   = 9E9
+	#print "Get topic info..."
+	info_dict = yaml.load(bag._get_yaml_info())
+	#print(info_dict['topics'])
 
-if (len(sys.argv) > 2):
-	start_time = float(start_time)
+	#print "Get list ..."
+	topic_list = []
+	cmd_msgs = 0
+	state_msgs = 0
 
-if (len(sys.argv) > 3):
-	end_time = float(end_time)
+	# ROS Topics
+	vicon_msgs		= []
+	cmd_vel_msgs	= []
 
-print "Read bag file ..."
-bag = rosbag.Bag(file_name, 'r')
+	# Vicon Data
+	vicon_topic = '/vicon/turtlebot_traj_track/turtlebot_traj_track'
+	vicon_time	= []
 
-print "Get topic info..."
-info_dict = yaml.load(bag._get_yaml_info())
-print(info_dict['topics'])
+	vicon_px	= []
+	vicon_py	= []
+	vicon_pz	= []
 
-print "Get list ..."
-topic_list = []
-cmd_msgs = 0
-state_msgs = 0
+	vicon_ox	= []
+	vicon_oy	= []
+	vicon_oz	= []
 
-# ROS Topics
-vicon_msgs		= []
-cmd_vel_msgs	= []
-clock_msgs		= []
+	# CMD Data
+	cmd_vel_topic = '/mobile_base/commands/velocity_FIXED'
+	cmd_time	= []
 
-# Time Data
-clock_topic = '/clock'
-time 		= []
+	cmd_vx 		= []
+	cmd_wz		= []
 
-# Vicon Data
-vicon_topic = '/vicon/turtlebot_traj_track/turtlebot_traj_track'
-vicon_time	= []
+	for topic_info in info_dict['topics']:
+		topic = topic_info['topic']
+		topic_list.append(topic)
 
-vicon_px	= []
-vicon_py	= []
-vicon_pz	= []
+		# if topic == clock_topic:
+		# 	clock_msgs = topic_info['messages']
+		if topic == vicon_topic:
+			vicon_msgs = topic_info['messages']
+		if topic == cmd_vel_topic:
+			cmd_vel_msgs = topic_info['messages']
 
-vicon_ox	= []
-vicon_oy	= []
-vicon_oz	= []
-vicon_ow	= []
+	#print topic_list
 
-# CMD Data
-cmd_vel_topic = '/mobile_base/commands/velocity'
-cmd_time	= []
+	#print "Message counts:"
+	# print "  clock msgs="+str(  clock_msgs	)
+	#print "  vicon msgs="+str(  vicon_msgs	)
+	#print "  cmd_vel msgs="+str(  cmd_vel_msgs	)
 
-cmd_vx 		= []
-cmd_wz		= []
+	#print "Process messages ..."
+	time_base = -1;
 
-for topic_info in info_dict['topics']:
-	topic = topic_info['topic']
-	topic_list.append(topic)
+	if (vicon_msgs):
+		vicon_time = [0 for x in xrange(vicon_msgs)]
+		vicon_px    = [0 for x in xrange(vicon_msgs)]
+		vicon_py    = [0 for x in xrange(vicon_msgs)]
+		vicon_pz    = [0 for x in xrange(vicon_msgs)]
+		vicon_rx    = [0 for x in xrange(vicon_msgs)]
+		vicon_ry    = [0 for x in xrange(vicon_msgs)]
+		vicon_rz    = [0 for x in xrange(vicon_msgs)]
 
-	if topic == clock_topic:
-		clock_msgs = topic_info['messages']
-	if topic == vicon_topic:
-		vicon_msgs = topic_info['messages']
-	if topic == cmd_vel_topic:
-		cmd_vel_msgs = topic_info['messages']
+		pt = 0
 
-print topic_list
+		for topic, msg, t0 in bag.read_messages(topics=vicon_topic):
+				if (time_base < 0):
+					time_base = msg.header.stamp.to_sec()
+					#print "time base =",time_base
 
-print "Message counts:"
-print "  clock msgs="+str(  clock_msgs	)
-print "  vicon msgs="+str(  vicon_msgs	)
-print "  cmd_vel msgs="+str(  cmd_vel_msgs	)
+				vicon_time[pt] = (msg.header.stamp.to_sec() - time_base)
+				vicon_px[pt]    = msg.transform.translation.x
+				vicon_py[pt]    = msg.transform.translation.y
+				vicon_pz[pt]    = msg.transform.translation.z
 
-print "Process messages ..."
-time_base = -1;
-jnt = 16
+				q = msg.transform.rotation
+				e = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+				vicon_rx[pt]    = e[0]*180.0/pi
+				vicon_ry[pt]    = e[1]*180.0/pi
+				vicon_rz[pt]    = e[2]*180.0/pi
 
-print "	Process clock data ..."
-if clock_msgs:
-	time = [0 for x in xrange(clock_msgs)]
+				pt = pt + 1
 
-	pt = 0
+		start_time = min(vicon_time)
+		end_time = max(vicon_time)
 
-	for topic, msg, t0 in bag.read_messages(topics=clock_topic):
-			if (time_base < 0):
-				time_base = msg.clock.secs + msg.clock.nsecs/1.0E9
-				print "time base =",time_base
+		#print "Clock start time ="+str(start_time)
+		#print "Set end time ="+str(end_time)
 
-			
-			time[pt] = (msg.clock.secs + msg.clock.nsecs/1.0E9 - time_base)
+		#print "vicon start time ="+str(min(vicon_time))
+		#print "vicon end time ="+str(max(vicon_time))
 
-			pt = pt + 1
+	if (cmd_vel_msgs):
+		cmd_time = [0 for x in xrange(cmd_vel_msgs)]
+		cmd_vx = [0 for x in xrange(cmd_vel_msgs)]
+		cmd_wz = [0 for x in xrange(cmd_vel_msgs)]
+		# cmd vel
 
-	start_time = min(time)
-	end_time = min(end_time, max(time))
+		pt = 0
 
-	print "Clock start time ="+str(min(time))
-	print "Set end time ="+str(end_time)
-
-if (cmd_vel_msgs):
-	cmd_vx = [0 for x in xrange(cmd_vel_msgs)]
-	cmd_wz = [0 for x in xrange(cmd_vel_msgs)]
-	# cmd vel
-
-	pt = 0
-
-	for topic, msg, t0 in bag.read_messages(topics=cmd_vel_topic):
-		cmd_vx[pt]   = msg.linear.x
-		cmd_wz[pt]   = msg.angular.z
-
-		pt = pt + 1
-
-	#print "Cmd start time ="+str(min(time_cmd))
-	#print "Cmd end time ="+str(max(time_cmd))
-
-if (vicon_msgs):
-	vicon_time = [0 for x in xrange(vicon_msgs)]
-	vicon_px    = [0 for x in xrange(vicon_msgs)]
-	vicon_py    = [0 for x in xrange(vicon_msgs)]
-	vicon_pz    = [0 for x in xrange(vicon_msgs)]
-	vicon_ox    = [0 for x in xrange(vicon_msgs)]
-	vicon_oy    = [0 for x in xrange(vicon_msgs)]
-	vicon_oz    = [0 for x in xrange(vicon_msgs)]
-	vicon_ow    = [0 for x in xrange(vicon_msgs)]
-
-	pt = 0
-
-	for topic, msg, t0 in bag.read_messages(topics=vicon_topic):
-			vicon_time[pt] = (msg.header.stamp.to_sec() - time_base)
-			vicon_px[pt]    = msg.transform.translation.x
-			vicon_py[pt]    = msg.transform.translation.y
-			vicon_pz[pt]    = msg.transform.translation.z
-			vicon_ox[pt]    = msg.transform.rotation.x
-			vicon_oy[pt]    = msg.transform.rotation.y
-			vicon_oz[pt]    = msg.transform.rotation.z
-			vicon_ow[pt]    = msg.transform.rotation.w
+		for topic, msg, t0 in bag.read_messages(topics=cmd_vel_topic):
+			cmd_time[pt] = (msg.header.stamp.to_sec() - time_base)
+			cmd_vx[pt]   = msg.twist.linear.x
+			cmd_vx[pt]   = msg.twist.linear.x
+			cmd_wz[pt]   = msg.twist.angular.z
 
 			pt = pt + 1
 
-	print "vicon start time ="+str(min(vicon_time))
-	print "vicon end time ="+str(max(vicon_time))
+		#print "Cmd start time ="+str(min(cmd_time))
+		#print "Cmd end time ="+str(max(cmd_time))
 
-print "Close bag!"
-bag.close()
-
-
-cmd_vx = cmd_vx[:len(time)]
-cmd_wz = cmd_wz[:len(time)]
-
-time = time[:len(cmd_vx)]
-time = time[:len(cmd_wz)]
-print len(time)
-print len(cmd_wz)
-
-if (cmd_vel_msgs):
-	print "  Plot commands ..."
-	tmin0 = min(time)-0.2
-	tmax0 = max(time)+0.2
-	vxmin0= min(cmd_vx)-0.2
-	vxmax0= max(cmd_vx)+0.2
-	wzmin0= min(cmd_wz)-0.2
-	wzmax0= max(cmd_wz)+0.2
-
-	print "  tmin=",str(tmin0),"  tmax=",str(tmax0)
-
-	fig_cmd = plt.figure()
-	ax_cmd = fig_cmd.add_subplot(111)
-	ax_cmd.hold(True)
-	ax_cmd.plot(time,cmd_vx,'r')
-	ax_cmd.plot(time,cmd_wz,'g')
-	ax_cmd.axis([tmin0, tmax0, vxmin0, vxmax0])
-
-	ax_cmd.set_ylabel('m/s rad/s')
-	ax_cmd.set_xlabel('time')
-	ax_cmd.legend(['vx_cmd (m/s)', 'wz_cmd (rad/s)'])
-	fig_cmd.suptitle("Commands")
+	#print "Close bag!"
+	bag.close()
 
 
-if (vicon_msgs):
-	print "  Plot vicon ..."
-	tmin0 = min([min(vicon_time),min(time)])-0.2
-	tmax0 = max([max(vicon_time),max(time)])+0.2
-	pmin0= min([min(vicon_px), min(vicon_py), min(vicon_pz)])-0.2
-	pmax0= max([max(vicon_px), max(vicon_py), max(vicon_pz)])+0.2
+	veloc_t = []
+	veloc = []
+	for i in range(1, len(vicon_time)):
+		delta_x = vicon_px[i]-vicon_px[i-1]
+		delta_y = vicon_py[i]-vicon_py[i-1]
+		delta_d = (delta_x**2 + delta_y**2)**0.5
+		delta_t = vicon_time[i]-vicon_time[i-1]
 
-	print "  tmin=",str(tmin0),"  tmax=",str(tmax0)
-
-	fig_cmd = plt.figure()
-	ax_cmd = fig_cmd.add_subplot(111)
-	ax_cmd.hold(True)
-	ax_cmd.plot(vicon_time,vicon_px,'r')
-	ax_cmd.plot(vicon_time,vicon_py,'g')
-	ax_cmd.plot(vicon_time,vicon_pz,'b')
-	ax_cmd.axis([tmin0, tmax0, pmin0, pmax0])
-
-	ax_cmd.set_ylabel('meters')
-	ax_cmd.set_xlabel('time')
-	ax_cmd.legend(['px_actual (m)', 'py_actual (m)', 'pz_actual (m)'])
-	fig_cmd.suptitle("Vicon Data")
+		veloc.append(delta_d/delta_t - 0.325)
+		veloc_t.append(vicon_time[i])
 
 
-print "Show plot..."
-plt.show()
+	pd = Post_Data()
+	pd.vicon_t = vicon_time
+	pd.vicon_px = vicon_px
+	pd.vicon_py = vicon_py
+	pd.vicon_rz = vicon_rz
+	pd.veloc = veloc
+	pd.veloc_t = veloc_t
+
+	pd.cmd_vx = cmd_vx
+	pd.cmd_wz = cmd_wz
+	pd.cmd_t = cmd_time
+
+	return pd
+
+def min_max(array):
+	a = []
+	b = []
+	for x in array:
+		a.append(min(x))
+		b.append(max(x))
+	mi = min(a) - 0.2
+	ma = max(b) + 0.2
+
+	return mi, ma
+
+def plotter(pd, cntrllr="PID", disturbance="board", trial="1", saver=""):
+
+	name = "%s controller with %s disturbance. Trial #%s: " % (cntrllr, disturbance, trial)
+	
+
+	#print len(pd.cmd_t), len(pd.vicon_t)
+	tmin, tmax = min_max([pd.vicon_t, pd.cmd_t])
+	#print "  tmin=",str(tmin),"  tmax=",str(tmax)
+
+	#print "  Plot commands ..."
+	pwmin, pwmax = min_max([pd.cmd_vx, pd.cmd_wz])
+
+	fig = plt.figure()
+	subplt = fig.add_subplot(111)
+	subplt.hold(True)
+	subplt.plot(pd.cmd_t,pd.cmd_vx,'r')
+	subplt.plot(pd.cmd_t,pd.cmd_wz,'g')
+	subplt.axis([tmin, tmax, pwmin, pwmax])
+
+	subplt.set_ylabel('m/s rad/s')
+	subplt.set_xlabel('time')
+	subplt.legend(['vx_cmd (m/s)', 'wz_cmd (rad/s)'])
+	fig.suptitle(name + "Commands")
+	fig.savefig(saver + " Commands.png")
+
+	#print "  Plot vicon ..."
+
+	pmin, pmax = min_max([pd.vicon_px, pd.vicon_py])
+
+	fig = plt.figure()
+	subplt = fig.add_subplot(111)
+	subplt.hold(True)
+	subplt.plot(pd.vicon_t,pd.vicon_px,'r')
+	subplt.plot(pd.vicon_t,pd.vicon_py,'g')
+	# subplt.plot(vicon_time,vicon_pz,'b')
+	subplt.axis([tmin, tmax, pmin, pmax])
+
+	subplt.set_ylabel('meters')
+	subplt.set_xlabel('time')
+	subplt.legend(['px_actual (m)', 'py_actual (m)'])
+	fig.suptitle(name + "Vicon Data")
+	fig.savefig(saver + " Vicon Data.png")
+
+
+	rmin, rmax = min_max([pd.vicon_rz])
+
+	fig = plt.figure()
+	subplt = fig.add_subplot(111)
+	subplt.hold(True)
+	# subplt.plot(vicon_time,vicon_rx,'r')
+	# subplt.plot(vicon_time,vicon_ry,'g')
+	subplt.plot(pd.vicon_t,pd.vicon_rz,'b')
+	subplt.axis([tmin, tmax, rmin, rmax])
+
+	subplt.set_ylabel('degrees')
+	subplt.set_xlabel('time')
+	subplt.legend(['rz_error (degrees)'])
+	fig.suptitle(name + "Angle Error")
+	fig.savefig(saver + " Angle Error.png")
+
+
+	#print "  Plot velocity ..."
+
+	vmin, vmax = min_max([pd.veloc])
+	vtmin, vtmax = min_max([pd.veloc_t])
+
+	fig = plt.figure()
+	subplt = fig.add_subplot(111)
+	subplt.grid(color='black', linestyle='-', linewidth=1)
+	subplt.hold(True)
+	subplt.plot(pd.veloc_t,pd.veloc,'b')
+	# subplt.plot(vicon_time,vicon_pz,'b')
+	subplt.axis([vtmin, vtmax, vmin, vmax])
+	subplt.set_ylabel('meters/second')
+	subplt.set_xlabel('time')
+	subplt.legend(['velocity_error (m/s)'])
+	fig.suptitle(name + "Velocity Error")
+	fig.savefig(saver + " Velocity Error.png")
+
+def fix_data(bag_file):
+
+    repaired_file = bag_file.replace(".bag", "_fixed.bag")  # Output bag path
+
+    topic1 = '/mobile_base/commands/velocity'  # Target topic you want to repair
+    topic2 = '/vicon/turtlebot_traj_track/turtlebot_traj_track'
+    
+    # Open bag
+    bag = rosbag.Bag(bag_file, 'r')
+    fix_bag = rosbag.Bag(repaired_file, "w")  # Create a repaired bag
+
+    # Iterate through bag
+    for topic, msg, t in bag.read_messages():
+        # Add time back to the target message header
+        if topic == topic1:
+            m = TwistStamped()
+            m.twist = msg
+            m.header.stamp.secs = t.secs
+            m.header.stamp.nsecs = t.nsecs
+
+            # Write message to bag
+            fix_bag.write(topic+"_FIXED", m, t)
+
+        if topic == topic2:
+
+            # Write message to bag
+            fix_bag.write(topic2, msg, t)
+
+    # Close bag - Very important else you'll have to reindex it
+    fix_bag.close()
+    return repaired_file
+
+if __name__ == '__main__':
+	os.chdir(".")
+	for bag_file in glob.glob("NLF_board_2.bag"):
+		print(bag_file)
+		a = bag_file[:-4].split('_')
+		cntrllr = a[0]
+		disturbance = a[1]
+		trial = a[2]
+
+		repaired_file = fix_data(bag_file)
+
+		pd = processor(repaired_file)
+		plotter(pd, cntrllr, disturbance, trial, bag_file[:-4])
+
