@@ -19,8 +19,8 @@ def MPC_controller(controller, data):
 
     # def const params
     N = 5 #window length
-    Q = [01,1,0.5]
-    R = [0.1,0.01]
+    Q = [1,1,1]
+    R = [1,.1]
     dt = data.time_step #time step
     x = current_state_x
     y = current_state_y
