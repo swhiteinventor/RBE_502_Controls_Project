@@ -278,7 +278,7 @@ def processor(bag_file='test.bag', x_data_range=2, v_desired=0.325, theta_desire
 	theta_error_avg = np.mean(np.array(vicon_rz))
 
 	# save the data to outdata.csv
-	file = open("outdata.csv","a") 
+	file = open("out/results.csv","a") 
 	data_str = "%s, %s, %s, %s, %s, %s, %s,\n" % (bag_file, v_error_rms, theta_error_rms, v_error_max, theta_error_max, v_error_avg, theta_error_avg)
 	file.write(data_str)
 	file.close() 
@@ -517,8 +517,11 @@ if __name__ == '__main__':
 	#  set the directory to current
 	os.chdir(".")
 
+	# make a out directory
+	os.mkdir("out/")
+
 	# setup CSV file for output data by clearing contents
-	file = open("outdata.csv","w")
+	file = open("out/results.csv","w")
 	file.write("Filename, v_error_rms, theta_error_rms, v_error_max, theta_error_max, v_error_avg, theta_error_avg,\n")
 	file.close() 
 
@@ -546,4 +549,4 @@ if __name__ == '__main__':
 		# pass repaird file to processor and set x_data_range of 1.5
 		pd = processor(repaired_file, x_data_range=1.5)
 		# pass the pd to the plotter
-		plotter(pd, cntrllr, disturbance, trial, bag_file[:-4])
+		plotter(pd, cntrllr, disturbance, trial, "out/" + bag_file[:-4])
