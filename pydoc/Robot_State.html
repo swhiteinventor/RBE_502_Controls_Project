@@ -1,0 +1,90 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Robot_State</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Robot_State</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/davis/Documents/WPI/Turtlebot/src/controls/nodes/controls/Robot_State.py">/home/davis/Documents/WPI/Turtlebot/src/controls/nodes/controls/Robot_State.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="Robot_State.html#Data">Data</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Robot_State.html#Robot_State">Robot_State</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Data">class <strong>Data</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Data">Data</a>&nbsp;wrapper&nbsp;for&nbsp;passing&nbsp;data&nbsp;to&nbsp;controller&nbsp;implementations<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Data-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initiallize&nbsp;the&nbsp;<a href="#Data">Data</a>&nbsp;wrapper&nbsp;with&nbsp;no&nbsp;values<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Robot_State">class <strong>Robot_State</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Class&nbsp;to&nbsp;contain&nbsp;state&nbsp;information&nbsp;of&nbsp;the&nbsp;Robot&nbsp;such&nbsp;as&nbsp;positional&nbsp;and&nbsp;rotational&nbsp;xyz&nbsp;along&nbsp;with&nbsp;the&nbsp;time&nbsp;stamp&nbsp;for&nbsp;the&nbsp;data.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Robot_State-__init__"><strong>__init__</strong></a>(self, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>, z<font color="#909090">=0</font>, roll<font color="#909090">=0</font>, pitch<font color="#909090">=0</font>, yaw<font color="#909090">=0</font>, t<font color="#909090">=0</font>)</dt><dd><tt>Initiallizes&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;object<br>
+Unset&nbsp;variables&nbsp;are&nbsp;default&nbsp;to&nbsp;0<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;-&nbsp;positional&nbsp;x&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;-&nbsp;positional&nbsp;y&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;-&nbsp;positional&nbsp;z&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roll&nbsp;-&nbsp;rotational&nbsp;x&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pitch&nbsp;-&nbsp;rotational&nbsp;y&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yaw&nbsp;-&nbsp;rotational&nbsp;z&nbsp;data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t&nbsp;-&nbsp;time&nbsp;data<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;-&nbsp;with&nbsp;filled&nbsp;variables</tt></dd></dl>
+
+<dl><dt><a name="Robot_State-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>Overrides&nbsp;the&nbsp;as&nbsp;string&nbsp;method&nbsp;for&nbsp;<a href="#Robot_State">Robot_State</a><br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;-&nbsp;Contains&nbsp;each&nbsp;variable&nbsp;of&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;to&nbsp;4&nbsp;decimal&nbsp;places</tt></dd></dl>
+
+<dl><dt><a name="Robot_State-__sub__"><strong>__sub__</strong></a>(self, b)</dt><dd><tt>Overrides&nbsp;the&nbsp;subtract&nbsp;method&nbsp;for&nbsp;<a href="#Robot_State">Robot_State</a><br>
+<a href="#Robot_State">Robot_State</a>&nbsp;=&nbsp;a&nbsp;-&nbsp;b<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;-&nbsp;(autohandled)&nbsp;b&nbsp;portion&nbsp;of&nbsp;(a-b)<br>
+Returns:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;-&nbsp;after&nbsp;subtraction</tt></dd></dl>
+
+<dl><dt><a name="Robot_State-divide_by_time"><strong>divide_by_time</strong></a>(self)</dt><dd><tt>Divides&nbsp;each&nbsp;variable&nbsp;of&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;by&nbsp;the&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;time&nbsp;field<br>
+The&nbsp;time&nbsp;field&nbsp;is&nbsp;returned&nbsp;without&nbsp;division<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Robot_State">Robot_State</a>&nbsp;-&nbsp;variables&nbsp;will&nbsp;be&nbsp;divided&nbsp;by&nbsp;time</tt></dd></dl>
+
+</td></tr></table></td></tr></table>
+</body></html>

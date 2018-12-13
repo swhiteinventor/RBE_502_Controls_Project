@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Import required Python code.
+
 import roslib; roslib.load_manifest('controls')
 import rospy
 import numpy as np
@@ -16,16 +16,25 @@ from NLF_Controller import NLF_controller
 from MPC_Controller import MPC_controller
 
 class Controller():
+	"""
+	Controller class framework for data calculations on Vicon data.
+	The framework calls the requested controller and generates the V & Omega values to command the Robot.
+	Finally the framework publishes V and Omega to the turtlebot
+	"""
 
 	def __init__(self):
-		"""initializes the controls node"""
+		"""
+		Initiallizes Controller Node
+		
+		Parameters:
+			None
+		Returns:
+			None
+		"""
 		rospy.loginfo("Server node started.")
 	
 		self.velocity = rospy.get_param("veloc_d")
 		self.angle = rospy.get_param("theta_d")
-		# Desired v,degrees
-		#self.velocity = .25 # m/s
-		#self.angle = 0 # degrees
 
 		# Controller Gains
 
@@ -38,8 +47,9 @@ class Controller():
 		self.kPD_1 = (3,	0.05)
 		self.kPD_2 = (3,	0.05)
 		# initialize Non-Linear Feedback gains
-		self.c = (4, 7)#(less chatter = smaller, faster convergence = bigger)	
+		self.c = (4, 7) # (less chatter = smaller, faster convergence = bigger)	
 
+		self.DEBUG = True
 
 		# initializes the robot's position and orientation and time
 		self.past_state = None
@@ -80,7 +90,16 @@ class Controller():
 		rospy.spin()
 
 	def trajectory_tracking(self, desired_v, desired_theta):
-		"""Given a desired velocity and angle, output velocity and angle will be caluclated"""
+		"""
+		Given a desired velocity and angle, output velocity and angle will be caluclated
+
+		Parameters: 
+			desired_v - the desired velocity to move at
+			desired_theta - the desired theta to follow
+		Returns:
+			v - linear velocity to command the robot
+			omega - angular velocity to command the robot
+		"""
 
 		# calculate the derivatives of the state (x_dot, y_dot, yaw_dot, etc) and the time step
 		state_dot = self.calculate_derivatives()
@@ -106,10 +125,9 @@ class Controller():
 		current_theta = self.current_state.yaw
 
 		# get the signed velocity
-		#signed_velocity = state_dot.x*cos(current_theta) + state_dot.y*sin(current_theta)
 		v_angle = atan2(state_dot.y,state_dot.x)
+
 		# get the sign from the velocity
-		#sign = -1 if signed_velocity < 0 else 1 if signed_velocity > 0 else 0
 		sign = -1 if v_angle < pi/2.0 or v_angle > pi/2.0 else 1
 
 		# apply sign to pythagorian velocity
@@ -152,14 +170,27 @@ class Controller():
 		data.current_theta = current_theta
 		data.desired_x_dot = desired_x_dot
 		data.desired_y_dot = desired_y_dot
+
 		# runs chosen controller:
 		v, omega = self.controller(self, data)
 
 		print "c_x=%.2f m, c_y=%.2f, c_v=%.4f m/s, c_theta=%.2f deg,e_x=%.2f, e_y=%.2f, e_v=%.2f, e_theta=%.2f, v=%.2f, omega=%.2f deg/s" % (self.current_state.x, self.current_state.y, current_v, current_theta*180/pi,error_x, error_y,  error_v, error_theta*180/pi, v, omega*180/pi)
+		
 		return (v, omega)
 
 
 	def calculate_integral(self, current, last, delta_t):
+		"""
+		Calculate integral from current and last position with a timestep
+
+		Parameters:
+			current - positional value for a dimension
+			last - positional value for the same dimension
+			delta_t - time step in seconds between the last and current positions
+		Returns:
+			area - float value of section under the curve
+		"""
+
 		# calculate difference:
 		delta = current - last
 		# calculate rectangular area:
@@ -171,21 +202,45 @@ class Controller():
 		return area
 
 	def calculate_derivatives(self):
-		"""calculates the time derivative of the current stae"""
+		"""
+		Calculates the time derivative of the current state
+
+		Parameters:
+			None
+		Returns:
+			Robot_State - containing derivative of the self.current_state and self.past_state
+		"""
 
 		delta_state = self.current_state - self.past_state
+		
 		# calculates derivatives, where time (t) is the time step
 		state_dot = delta_state.divide_by_time()
 		return state_dot
 
 	def calculate_error(self, current, goal):
-		"""calculates the error between a desired input and a given input"""
+		"""
+		calculates the error between a desired input and a given input
 
+		Parameters:
+			None
+		Returns:
+			Robot_State - containing derivative of the self.current_state and self.past_state
+		"""
+		
 		error = goal - current
 		return error
 
 	def moving_average(self, new_v, new_omega):
-		"""takes in a new velocity and new omega command and returns the average velocity and omega command"""
+		"""
+		takes in a new velocity and new omega command and returns the average velocity and omega command
+
+		Parameters:
+			new_v - the most recent measured value for velocity
+			new_omega - the most recent measured value for omega
+		Returns:
+			v_average - the average the the self.moving_avg_count (N) velocity values
+			omega_average - the average the the self.moving_avg_count (N) omega values			
+		"""
 		self.v_array[self.array_iterator] = new_v
 		self.omega_array[self.array_iterator] = new_omega
 		v_average = np.mean(self.v_array)
@@ -193,11 +248,21 @@ class Controller():
 		self.array_iterator += 1
 		if self.array_iterator == self.moving_avg_count:
 			self.array_iterator = 0
-		return [v_average, omega_average]
+		return v_average, omega_average
 
 	def send_twist_message(self, v, omega):
-		"""takes in the velocity and theta"""
+		"""
+		Publishes the twist message to the turtlebot topic
+		
+		Parameters:
+			v - linear velocity to publish
+			omega - angular velocity to publish
+		Returns:
+			None
+		"""
 		t = Twist()
+
+		# bound the twist commands for simulations sake
 		v = max(-10, min(10, v))
 		omega = max(-10, min(10, omega))
 		
@@ -207,11 +272,20 @@ class Controller():
 	 	t.angular.x = 0
 		t.angular.y = 0
 		t.angular.z = omega
+
+		# publish the message
 		self.pub.publish(t)
 
 
 	def on_data(self, data):	
-		"""Callback function that handle subscriber data and updates self."""
+		"""
+		Callback function that handle subscriber data and updates self
+
+		Parameters:
+			data - containing a TransformStamped message of Vicon data
+		Returns:
+			None
+		"""
 
 		# set desired data rate:
 		desired_ = .001 # sec
@@ -272,14 +346,28 @@ class Controller():
 		self.send_twist_message(v, omega)
 
 	def quaternion_to_euler(self, quaternion):
-		"""converts a quaternion to euler angles"""
-		#type(pose) = geometry_msgs.msg.Pose
+		"""
+		converts a quaternion to euler angles
+
+		Parameters:
+			quaternion - x,y,z,w value format
+		Returns:
+			euler - x,y,z
+		"""
+
 		euler = tf.transformations.euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 		return euler
 
-# Main function.
 if __name__ == '__main__':
-	# Initialize the node and name it.
+	"""
+	Initialize the node and name it
+
+	Parameters:
+		None
+	Returns:
+		None
+	"""
+
 	print "Initiating server node..."
 	rospy.init_node('Controller')
     

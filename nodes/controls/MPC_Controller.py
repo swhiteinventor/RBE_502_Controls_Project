@@ -4,7 +4,6 @@
 #
 from cvxopt import matrix
 from cvxopt.solvers import qp
-# from quadprog import solve_qp as qp # can substitute cvxopt
 import numpy as np
 from math import cos, sin
 

@@ -1,6 +1,5 @@
 # NLF_Controller
 from math import sin, cos, pi
-from Robot_State import Robot_State, Data
 
 def NLF_controller(controller, data):
 	

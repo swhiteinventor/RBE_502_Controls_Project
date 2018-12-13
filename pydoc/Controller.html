@@ -1,0 +1,143 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Controller</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Controller</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/davis/Documents/WPI/Turtlebot/src/controls/nodes/controls/Controller.py">/home/davis/Documents/WPI/Turtlebot/src/controls/nodes/controls/Controller.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+<a href="roslib.html">roslib</a><br>
+</td><td width="25%" valign=top><a href="rospy.html">rospy</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="tf.html">tf</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="Controller.html#Controller">Controller</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Controller">class <strong>Controller</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Controller">Controller</a>&nbsp;class&nbsp;framework&nbsp;for&nbsp;data&nbsp;calculations&nbsp;on&nbsp;Vicon&nbsp;data.<br>
+The&nbsp;framework&nbsp;calls&nbsp;the&nbsp;requested&nbsp;controller&nbsp;and&nbsp;generates&nbsp;the&nbsp;V&nbsp;&amp;&nbsp;Omega&nbsp;values&nbsp;to&nbsp;command&nbsp;the&nbsp;Robot.<br>
+Finally&nbsp;the&nbsp;framework&nbsp;publishes&nbsp;V&nbsp;and&nbsp;Omega&nbsp;to&nbsp;the&nbsp;turtlebot<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Controller-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initiallizes&nbsp;<a href="#Controller">Controller</a>&nbsp;Node<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Controller-calculate_derivatives"><strong>calculate_derivatives</strong></a>(self)</dt><dd><tt>Calculates&nbsp;the&nbsp;time&nbsp;derivative&nbsp;of&nbsp;the&nbsp;current&nbsp;state<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Robot_State&nbsp;-&nbsp;containing&nbsp;derivative&nbsp;of&nbsp;the&nbsp;self.<strong>current_state</strong>&nbsp;and&nbsp;self.<strong>past_state</strong></tt></dd></dl>
+
+<dl><dt><a name="Controller-calculate_error"><strong>calculate_error</strong></a>(self, current, goal)</dt><dd><tt>calculates&nbsp;the&nbsp;error&nbsp;between&nbsp;a&nbsp;desired&nbsp;input&nbsp;and&nbsp;a&nbsp;given&nbsp;input<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Robot_State&nbsp;-&nbsp;containing&nbsp;derivative&nbsp;of&nbsp;the&nbsp;self.<strong>current_state</strong>&nbsp;and&nbsp;self.<strong>past_state</strong></tt></dd></dl>
+
+<dl><dt><a name="Controller-calculate_integral"><strong>calculate_integral</strong></a>(self, current, last, delta_t)</dt><dd><tt>Calculate&nbsp;integral&nbsp;from&nbsp;current&nbsp;and&nbsp;last&nbsp;position&nbsp;with&nbsp;a&nbsp;timestep<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;current&nbsp;-&nbsp;positional&nbsp;value&nbsp;for&nbsp;a&nbsp;dimension<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;last&nbsp;-&nbsp;positional&nbsp;value&nbsp;for&nbsp;the&nbsp;same&nbsp;dimension<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delta_t&nbsp;-&nbsp;time&nbsp;step&nbsp;in&nbsp;seconds&nbsp;between&nbsp;the&nbsp;last&nbsp;and&nbsp;current&nbsp;positions<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area&nbsp;-&nbsp;float&nbsp;value&nbsp;of&nbsp;section&nbsp;under&nbsp;the&nbsp;curve</tt></dd></dl>
+
+<dl><dt><a name="Controller-moving_average"><strong>moving_average</strong></a>(self, new_v, new_omega)</dt><dd><tt>takes&nbsp;in&nbsp;a&nbsp;new&nbsp;velocity&nbsp;and&nbsp;new&nbsp;omega&nbsp;command&nbsp;and&nbsp;returns&nbsp;the&nbsp;average&nbsp;velocity&nbsp;and&nbsp;omega&nbsp;command<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new_v&nbsp;-&nbsp;the&nbsp;most&nbsp;recent&nbsp;measured&nbsp;value&nbsp;for&nbsp;velocity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new_omega&nbsp;-&nbsp;the&nbsp;most&nbsp;recent&nbsp;measured&nbsp;value&nbsp;for&nbsp;omega<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v_average&nbsp;-&nbsp;the&nbsp;average&nbsp;the&nbsp;the&nbsp;self.<strong>moving_avg_count</strong>&nbsp;(N)&nbsp;velocity&nbsp;values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omega_average&nbsp;-&nbsp;the&nbsp;average&nbsp;the&nbsp;the&nbsp;self.<strong>moving_avg_count</strong>&nbsp;(N)&nbsp;omega&nbsp;values</tt></dd></dl>
+
+<dl><dt><a name="Controller-on_data"><strong>on_data</strong></a>(self, data)</dt><dd><tt>Callback&nbsp;function&nbsp;that&nbsp;handle&nbsp;subscriber&nbsp;data&nbsp;and&nbsp;updates&nbsp;self<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;-&nbsp;containing&nbsp;a&nbsp;TransformStamped&nbsp;message&nbsp;of&nbsp;Vicon&nbsp;data<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Controller-quaternion_to_euler"><strong>quaternion_to_euler</strong></a>(self, quaternion)</dt><dd><tt>converts&nbsp;a&nbsp;quaternion&nbsp;to&nbsp;euler&nbsp;angles<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quaternion&nbsp;-&nbsp;x,y,z,w&nbsp;value&nbsp;format<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;euler&nbsp;-&nbsp;x,y,z</tt></dd></dl>
+
+<dl><dt><a name="Controller-send_twist_message"><strong>send_twist_message</strong></a>(self, v, omega)</dt><dd><tt>Publishes&nbsp;the&nbsp;twist&nbsp;message&nbsp;to&nbsp;the&nbsp;turtlebot&nbsp;topic<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v&nbsp;-&nbsp;linear&nbsp;velocity&nbsp;to&nbsp;publish<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omega&nbsp;-&nbsp;angular&nbsp;velocity&nbsp;to&nbsp;publish<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Controller-trajectory_tracking"><strong>trajectory_tracking</strong></a>(self, desired_v, desired_theta)</dt><dd><tt>Given&nbsp;a&nbsp;desired&nbsp;velocity&nbsp;and&nbsp;angle,&nbsp;output&nbsp;velocity&nbsp;and&nbsp;angle&nbsp;will&nbsp;be&nbsp;caluclated<br>
+&nbsp;<br>
+Parameters:&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desired_v&nbsp;-&nbsp;the&nbsp;desired&nbsp;velocity&nbsp;to&nbsp;move&nbsp;at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desired_theta&nbsp;-&nbsp;the&nbsp;desired&nbsp;theta&nbsp;to&nbsp;follow<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v&nbsp;-&nbsp;linear&nbsp;velocity&nbsp;to&nbsp;command&nbsp;the&nbsp;robot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;omega&nbsp;-&nbsp;angular&nbsp;velocity&nbsp;to&nbsp;command&nbsp;the&nbsp;robot</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-atan2"><strong>atan2</strong></a>(...)</dt><dd><tt><a href="#-atan2">atan2</a>(y,&nbsp;x)<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;arc&nbsp;tangent&nbsp;(measured&nbsp;in&nbsp;radians)&nbsp;of&nbsp;y/x.<br>
+Unlike&nbsp;atan(y/x),&nbsp;the&nbsp;signs&nbsp;of&nbsp;both&nbsp;x&nbsp;and&nbsp;y&nbsp;are&nbsp;considered.</tt></dd></dl>
+ <dl><dt><a name="-cos"><strong>cos</strong></a>(...)</dt><dd><tt><a href="#-cos">cos</a>(x)<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;cosine&nbsp;of&nbsp;x&nbsp;(measured&nbsp;in&nbsp;radians).</tt></dd></dl>
+ <dl><dt><a name="-sin"><strong>sin</strong></a>(...)</dt><dd><tt><a href="#-sin">sin</a>(x)<br>
+&nbsp;<br>
+Return&nbsp;the&nbsp;sine&nbsp;of&nbsp;x&nbsp;(measured&nbsp;in&nbsp;radians).</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>pi</strong> = 3.141592653589793</td></tr></table>
+</body></html>
