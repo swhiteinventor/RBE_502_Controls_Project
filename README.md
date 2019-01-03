@@ -1,8 +1,5 @@
 # Turtlebot Controllers (RBE 502)
 
-## Task(s):
- - Write report
-
 ## Repo Structure:
  - [launch/](launch/)
  	- ROS launch files for vicon, controllers, and simulation
