@@ -30,7 +30,7 @@ To easily demonstrate the ability on simulation run the following commands in tw
 
 ```
 roslaunch controls turtlebot.launch sim:=true
-roslaunch controls controls.launch sim=:true
+roslaunch controls controls.launch sim:=true
 ```
 
 The 1st command will launch gazebo with the turtlbot in an empty world.
